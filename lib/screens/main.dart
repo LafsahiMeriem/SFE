@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:datawedgeflutter/screens/EncoderPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'EncoderPage.dart';
+import 'database_helper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -80,9 +80,10 @@ class MenuPage extends StatelessWidget {
         mainAxisSpacing: 16,
         children: [
           _buildMenuItem(context, 'Ajouter', Icons.add, () {
+            // Navigate to the Ajouter page
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AddPage()),
+              MaterialPageRoute(builder: (context) => const Ajouter()),
             );
           }),
           _buildMenuItem(context, 'Importer', Icons.file_upload, () {}),
@@ -138,26 +139,29 @@ class MenuPage extends StatelessWidget {
   }
 }
 
-class AddPage extends StatefulWidget {
-  const AddPage({Key? key});
+class Ajouter extends StatefulWidget {
+  const Ajouter({Key? key}) : super(key: key);
 
   @override
-  _AddPageState createState() => _AddPageState();
+  _AjouterState createState() => _AjouterState();
 }
 
-class _AddPageState extends State<AddPage> {
-  TextEditingController _productController = TextEditingController();
-  TextEditingController _barcodeController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
+class _AjouterState extends State<Ajouter> {
+  final TextEditingController _productController = TextEditingController();
+  final TextEditingController _barcodeController = TextEditingController();
+  final TextEditingController _buildingController = TextEditingController();
+  final TextEditingController _floorController = TextEditingController();
+  final TextEditingController _zoneController = TextEditingController();
+  final TextEditingController _referenceController = TextEditingController();
 
   @override
   void dispose() {
     _productController.dispose();
     _barcodeController.dispose();
+    _buildingController.dispose();
+    _floorController.dispose();
+    _zoneController.dispose();
+    _referenceController.dispose();
     super.dispose();
   }
 
@@ -175,29 +179,64 @@ class _AddPageState extends State<AddPage> {
             children: [
               TextFormField(
                 controller: _productController,
-                decoration: InputDecoration(labelText: 'Produit'),
+                decoration: const InputDecoration(labelText: 'Produit'),
               ),
               TextFormField(
                 controller: _barcodeController,
-                decoration: InputDecoration(labelText: 'Code barre'),
+                decoration: const InputDecoration(labelText: 'Code barre'),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Bâtiment'),
+                controller: _buildingController,
+                decoration: const InputDecoration(labelText: 'Bâtiment'),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Étage'),
+                controller: _floorController,
+                decoration: const InputDecoration(labelText: 'Étage'),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Zone'),
+                controller: _zoneController,
+                decoration: const InputDecoration(labelText: 'Zone'),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Référence'),
+                controller: _referenceController,
+                decoration: const InputDecoration(labelText: 'Référence'),
               ),
               ElevatedButton(
-                onPressed: () {
-                  // Add logic here to handle the form
+                onPressed: () async {
+                  // Get the values from the text fields
+                  final String product = _productController.text;
+                  final String barcode = _barcodeController.text;
+                  final String building = _buildingController.text;
+                  final String floor = _floorController.text;
+                  final String zone = _zoneController.text;
+                  final String reference = _referenceController.text;
+
+                  // Insert data into the database
+                  await DatabaseHelper.instance.insert({
+                    'name': product,
+                    'barcode': barcode,
+                    'building': building,
+                    'floor': floor,
+                    'zone': zone,
+                    'reference': reference,
+                  });
+
+                  // Show a snackbar to indicate successful insertion
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Data inserted into database.'),
+                    ),
+                  );
+
+                  // Clear text fields after submission
+                  _productController.clear();
+                  _barcodeController.clear();
+                  _buildingController.clear();
+                  _floorController.clear();
+                  _zoneController.clear();
+                  _referenceController.clear();
                 },
-                child: Text('Ajouter'),
+                child: const Text('Ajouter'),
               ),
             ],
           ),
@@ -206,6 +245,7 @@ class _AddPageState extends State<AddPage> {
     );
   }
 }
+
 void startScan(BuildContext context) {
   const MethodChannel methodChannel =
       MethodChannel('com.darryncampbell.datawedgeflutter/command');
@@ -219,7 +259,7 @@ void startScan(BuildContext context) {
       .then((_) {
     // Show a SnackBar to indicate that the scan has started
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Scan démarré'),
         duration: Duration(seconds: 1),
       ),

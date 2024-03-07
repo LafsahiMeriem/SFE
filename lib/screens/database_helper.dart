@@ -62,7 +62,7 @@ class DatabaseHelper {
   }
 
   // Query all rows in the database
-  Future<List<Map<String, dynamic>>> queryAllRows() async {
+  Future<List<Map<String, dynamic>>> queryAll() async {
     Database db = await instance.database;
     return await db.query(table);
   }

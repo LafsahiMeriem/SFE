@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:excel/excel.dart';
 
 class DatabaseHelper {
   static final _databaseName = "my_database.db";
@@ -62,21 +63,49 @@ class DatabaseHelper {
   }
 
   // Query all rows in the database
+  Future<List<Map<String, dynamic>>> queryAllRows() async {
+    Database db = await instance.database;
+    return await db.query(table);
+  }
   Future<List<Map<String, dynamic>>> queryAll() async {
     Database db = await instance.database;
     return await db.query(table);
   }
 
-  // Update a row in the database
-  Future<int> update(Map<String, dynamic> row) async {
-    Database db = await instance.database;
-    int id = row[columnId];
-    return await db.update(table, row, where: '$columnId = ?', whereArgs: [id]);
+
+
+  // Export data to Excel
+  Future<String?> exportDataToExcel() async {
+    List<Map<String, dynamic>> data = await queryAllRows();
+    if (data.isNotEmpty) {
+      final excel = Excel.createExcel();
+      final sheet = excel['Sheet1'];
+      sheet.appendRow([
+        'ID', 'Name', 'Barcode', 'Building', 'Floor', 'Zone', 'Reference'
+      ]);
+      data.forEach((row) {
+        sheet.appendRow([
+          row[columnId],
+          row[columnName],
+          row[columnBarcode],
+          row[columnBuilding],
+          row[columnFloor],
+          row[columnZone],
+          row[columnReference]
+        ]);
+      });
+      final excelFileName = 'exported_data.xlsx';
+      final excelFilePath = await _getFilePath(excelFileName);
+      await File(excelFilePath).writeAsBytes(await excel.encode()!);
+
+      return excelFilePath;
+    } else {
+      return null;
+    }
   }
 
-  // Delete a row from the database
-  Future<int> delete(int id) async {
-    Database db = await instance.database;
-    return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
+  Future<String> _getFilePath(String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    return join(directory.path, fileName);
   }
 }

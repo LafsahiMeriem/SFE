@@ -34,6 +34,7 @@ dependencies:
   sqflite: ^2.3.2   
   path: ^1.9.0
   path_provider: ^2.1.2
+  excel: ^2.0.0
 
 
 

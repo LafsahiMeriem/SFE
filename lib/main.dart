@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:datawedgeflutter/screens/EncoderPage.dart';
+import 'package:datawedgeflutter/EncoderPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'ImportPage.dart';
 import 'database_helper.dart';
 
 void main() {
@@ -86,7 +87,12 @@ class MenuPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const Ajouter()),
             );
           }),
-          _buildMenuItem(context, 'Importer', Icons.file_upload, () {}),
+          _buildMenuItem(context, 'Importer', Icons.file_upload, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ImportPage()),
+            );
+          }),
           _buildMenuItem(context, 'Encoder', Icons.qr_code, () {
             Navigator.push(
               context,

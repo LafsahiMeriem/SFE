@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:excel/excel.dart';
 import 'database_helper.dart'; // Importez votre fichier database_helper.dart
+import 'package:csv/csv.dart';
 
 class ImportPage extends StatelessWidget {
   const ImportPage({Key? key}) : super(key: key);
@@ -25,17 +24,17 @@ class ImportPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () async {
-                String? filePath = await exportDataToExcel();
+                String? filePath = await exportDataToCSV();
                 if (filePath != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Fichier Excel créé : $filePath'),
+                      content: Text('Fichier CSV créé : $filePath'),
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Erreur lors de la création du fichier Excel'),
+                      content: Text('Erreur lors de la création du fichier CSV'),
                     ),
                   );
                 }
@@ -49,45 +48,31 @@ class ImportPage extends StatelessWidget {
     );
   }
 
-  Future<String?> exportDataToExcel() async {
+  Future<String?> exportDataToCSV() async {
     try {
       List<Map<String, dynamic>> data = await DatabaseHelper.instance.queryAll();
 
-      // Créer un nouveau fichier Excel
-      final excel = Excel.createExcel();
-      final sheet = excel['Sheet1'];
+      // Convertir la liste de maps en une liste de listes de données dynamiques
+      List<List<dynamic>> csvData = data.map((e) => e.values.toList()).toList();
 
-      // Ajouter les en-têtes de colonne
-      sheet.appendRow(['ID', 'Name', 'Barcode', 'Building', 'Floor', 'Zone', 'Reference']);
+      // Créer un nouveau fichier CSV
+      final String csvFileName = 'exported_data.csv';
+      final String csvFilePath = await _getFilePath(csvFileName);
+      File csvFile = File(csvFilePath);
+      String csvString = const ListToCsvConverter().convert(csvData);
 
-      // Ajouter les données de la base de données au fichier Excel
-      data.forEach((row) {
-        sheet.appendRow([
-          row['_id'],
-          row['name'],
-          row['barcode'],
-          row['building'],
-          row['floor'],
-          row['zone'],
-          row['reference'],
-        ]);
-      });
+      // Écrire les données dans le fichier CSV
+      await csvFile.writeAsString(csvString);
 
-      // Enregistrer le fichier Excel dans le répertoire de téléchargement de l'application
-      final String excelFileName = 'exported_data.xlsx';
-      final String excelFilePath = await _getFilePath(excelFileName);
-      await File(excelFilePath).writeAsBytes(await excel.encode() as List<int>);
-
-      // Retourner le chemin du fichier Excel généré
-      return excelFilePath;
+      // Retourner le chemin du fichier CSV généré
+      return csvFilePath;
     } catch (e) {
-      print('Erreur lors de la création du fichier Excel: $e');
+      print('Erreur lors de la création du fichier CSV: $e');
       return null;
     }
   }
-
   Future<String> _getFilePath(String fileName) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/$fileName';
+    final Directory? directory = await getExternalStorageDirectory();
+    return '${directory!.path}/$fileName';
   }
 }

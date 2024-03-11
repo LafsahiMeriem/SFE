@@ -12,10 +12,12 @@ class EncodePage extends StatelessWidget {
       body: const Center(
         child: Text('Encoder Page'),
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          height: 60, // Set the height of the BottomAppBar
-          child: EncoderBottomBar(),
+      bottomNavigationBar: SafeArea(
+        child: BottomAppBar(
+          child: Container(
+            height: 60, // Set the height of the BottomAppBar
+            child: EncoderBottomBar(),
+          ),
         ),
       ),
     );
@@ -29,6 +31,7 @@ class EncoderBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.min,
       children: [
         _buildBottomBarItem(
           icon: Icons.search,
@@ -67,7 +70,6 @@ class EncoderBottomBar extends StatelessWidget {
           icon: Icon(icon),
           onPressed: onPressed,
         ),
-        SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(fontSize: 12), // Adjust the font size as needed

@@ -57,7 +57,7 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
   @override
   void initState() {
     super.initState();
-    // Show the menu after a delay of 5 seconds
+    // Show the menu after a delay of 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       setState(() {
         _showMenu = true;
@@ -195,33 +195,28 @@ class _AjouterState extends State<Ajouter> {
         title: const Text('Ajouter'),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          color: Colors.white, // Background color for the add form
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildTextField('Produit', _productController),
-                const SizedBox(height: 16),
-                _buildTextField('Code barre', _barcodeController),
-                const SizedBox(height: 16),
-                _buildTextField('Bâtiment', _buildingController),
-                const SizedBox(height: 16),
-                _buildTextField('Étage', _floorController),
-                const SizedBox(height: 16),
-                _buildTextField('Zone', _zoneController),
-                const SizedBox(height: 16),
-                _buildTextField('Référence', _referenceController),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _ajouter,
-                  child: const Text('Ajouter'),
-                ),
-              ],
-            ),
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTextField('Produit', _productController),
+              const SizedBox(height: 16),
+              _buildTextField('Code barre', _barcodeController),
+              const SizedBox(height: 16),
+              _buildTextField('Bâtiment', _buildingController),
+              const SizedBox(height: 16),
+              _buildTextField('Étage', _floorController),
+              const SizedBox(height: 16),
+              _buildTextField('Zone', _zoneController),
+              const SizedBox(height: 16),
+              _buildTextField('Référence', _referenceController),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _ajouter,
+                child: const Text('Ajouter'),
+              ),
+            ],
           ),
         ),
       ),

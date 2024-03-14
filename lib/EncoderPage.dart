@@ -10,7 +10,9 @@ class EncodePage extends StatefulWidget {
 
 class _EncodePageState extends State<EncodePage> {
   late TextEditingController _searchController;
-
+  List<String> buildings = ['building tech', 'building marjan', 'building Marjane'];
+  List<String> floors = ['floor 1', 'floor 2', 'floor 3'];
+  List<String> zones = ['zone droit', 'zone gauche', 'zone 1', 'zone 2', 'zone 3'];
   @override
   void initState() {
     super.initState();
@@ -29,11 +31,11 @@ class _EncodePageState extends State<EncodePage> {
       appBar: AppBar(
         title: const Text('Encoder'),
       ),
-      body: SingleChildScrollView( // Wrap the Column with SingleChildScrollView
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 20), // Add some spacing
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
@@ -48,7 +50,7 @@ class _EncodePageState extends State<EncodePage> {
                 },
               ),
             ),
-            const SizedBox(height: 20), // Add some spacing
+            const SizedBox(height: 20),
             const Text('Encoder Page'),
           ],
         ),
@@ -56,10 +58,13 @@ class _EncodePageState extends State<EncodePage> {
       bottomNavigationBar: SafeArea(
         child: BottomAppBar(
           child: Container(
-            height: 60, // Set the height of the BottomAppBar
+            height: 60,
             child: EncoderBottomBar(
               onEncodePressed: () {
                 _searchProductWithBarcode(context);
+              },
+              onNonEncodePressed: () {
+                _showFilterDialog(context);
               },
             ),
           ),
@@ -72,9 +77,9 @@ class _EncodePageState extends State<EncodePage> {
     final DatabaseHelper dbHelper = DatabaseHelper.instance;
     final List<Map<String, dynamic>> products = await dbHelper.queryAllRows();
 
-    // Filter products based on the productName
     List<Map<String, dynamic>> filteredProducts = products.where((product) =>
-        product[DatabaseHelper.columnName].toString().toLowerCase().contains(productName.toLowerCase())
+        product[DatabaseHelper.columnName].toString().toLowerCase().contains(
+            productName.toLowerCase())
     ).toList();
 
     _showProductsDialog(context, filteredProducts);
@@ -84,23 +89,24 @@ class _EncodePageState extends State<EncodePage> {
     final DatabaseHelper dbHelper = DatabaseHelper.instance;
     final List<Map<String, dynamic>> products = await dbHelper.queryAllRows();
 
-    // Filter products with non-empty barcode
     List<Map<String, dynamic>> filteredProducts = products.where((product) =>
-    product[DatabaseHelper.columnBarcode].toString().isNotEmpty
+    product[DatabaseHelper.columnBarcode]
+        .toString()
+        .isNotEmpty
     ).toList();
 
     _showProductsDialog(context, filteredProducts);
   }
 
-  void _showProductsDialog(BuildContext context, List<Map<String, dynamic>> products) {
+  void _showProductsDialog(BuildContext context,
+      List<Map<String, dynamic>> products) {
     if (products.isNotEmpty) {
-      // Display information of the products
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Product Information'),
-            content: SingleChildScrollView( // Wrap the Column with SingleChildScrollView
+            content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -108,13 +114,16 @@ class _EncodePageState extends State<EncodePage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Product Name: ${product[DatabaseHelper.columnName]}'),
+                      Text('Product Name: ${product[DatabaseHelper
+                          .columnName]}'),
                       Text('Barcode: ${product[DatabaseHelper.columnBarcode]}'),
-                      Text('Building: ${product[DatabaseHelper.columnBuilding]}'),
+                      Text('Building: ${product[DatabaseHelper
+                          .columnBuilding]}'),
                       Text('Floor: ${product[DatabaseHelper.columnFloor]}'),
                       Text('Zone: ${product[DatabaseHelper.columnZone]}'),
-                      Text('Reference: ${product[DatabaseHelper.columnReference]}'),
-                      const Divider(), // Add a divider between products
+                      Text('Reference: ${product[DatabaseHelper
+                          .columnReference]}'),
+                      const Divider(),
                     ],
                   );
                 }).toList(),
@@ -132,13 +141,13 @@ class _EncodePageState extends State<EncodePage> {
         },
       );
     } else {
-      // Display a message if no product found
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Product Not Found'),
-            content: const Text('No product found with the specified condition.'),
+            content: const Text(
+                'No product found with the specified condition.'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -152,12 +161,129 @@ class _EncodePageState extends State<EncodePage> {
       );
     }
   }
+
+  void _showFilterDialog(BuildContext context) {
+    String selectedBuilding = buildings.first;
+    String selectedFloor = floors.first;
+    String selectedZone = zones.first;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Filters'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: selectedBuilding,
+                items: buildings.map((String building) {
+                  return DropdownMenuItem<String>(
+                    value: building,
+                    child: Text(building),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedBuilding = newValue!;
+                  });
+                },
+              ),
+              DropdownButtonFormField<String>(
+                value: selectedFloor,
+                items: floors.map((String floor) {
+                  return DropdownMenuItem<String>(
+                    value: floor,
+                    child: Text(floor),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedFloor = newValue!;
+                  });
+                },
+              ),
+              DropdownButtonFormField<String>(
+                value: selectedZone,
+                items: zones.map((String zone) {
+                  return DropdownMenuItem<String>(
+                    value: zone,
+                    child: Text(zone),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedZone = newValue!;
+                  });
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _filterProducts(selectedBuilding, selectedFloor, selectedZone);
+                Navigator.pop(context);
+              },
+              child: Text('Filter'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _filterProducts(String building, String floor, String zone) async {
+    final DatabaseHelper dbHelper = DatabaseHelper.instance;
+    final List<Map<String, dynamic>> products = await dbHelper.queryAllRows();
+
+    List<Map<String, dynamic>> filteredProducts = products.where((product) =>
+    product[DatabaseHelper.columnBuilding] == building &&
+        product[DatabaseHelper.columnFloor] == floor &&
+        product[DatabaseHelper.columnZone] == zone &&
+        (product[DatabaseHelper.columnBarcode] == null ||
+            product[DatabaseHelper.columnBarcode]
+                .toString()
+                .isEmpty)
+    ).toList();
+
+    if (filteredProducts.isEmpty) {
+      // Si aucun produit n'est trouvé, incluez également ceux avec des valeurs nulles ou vides dans la colonne du code-barres
+      filteredProducts = products.where((product) =>
+      product[DatabaseHelper.columnBuilding] == building &&
+          product[DatabaseHelper.columnFloor] == floor &&
+          product[DatabaseHelper.columnZone] == zone &&
+          (product[DatabaseHelper.columnBarcode] == null ||
+              product[DatabaseHelper.columnBarcode]
+                  .toString()
+                  .isEmpty) &&
+          (product[DatabaseHelper.columnName] == null ||
+              product[DatabaseHelper.columnName]
+                  .toString()
+                  .isEmpty) &&
+          (product[DatabaseHelper.columnReference] == null ||
+              product[DatabaseHelper.columnReference]
+                  .toString()
+                  .isEmpty)
+      ).toList();
+    }
+
+    _showProductsDialog(context, filteredProducts);
+  }
 }
+
 
 class EncoderBottomBar extends StatelessWidget {
   final VoidCallback onEncodePressed;
+  final VoidCallback onNonEncodePressed;
 
-  const EncoderBottomBar({Key? key, required this.onEncodePressed}) : super(key: key);
+  const EncoderBottomBar({Key? key, required this.onEncodePressed, required this.onNonEncodePressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -180,9 +306,7 @@ class EncoderBottomBar extends StatelessWidget {
         _buildBottomBarItem(
           icon: Icons.qr_code_outlined,
           label: 'Non-Encoder',
-          onPressed: () {
-            // Add logic for non-encoding action
-          },
+          onPressed: onNonEncodePressed,
         ),
       ],
     );
@@ -202,7 +326,7 @@ class EncoderBottomBar extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 12), // Adjust the font size as needed
+          style: TextStyle(fontSize: 12),
         ),
       ],
     );

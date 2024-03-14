@@ -72,8 +72,6 @@ class DatabaseHelper {
     return await db.query(table);
   }
 
-
-
   // Export data to Excel
   Future<String?> exportDataToExcel() async {
     List<Map<String, dynamic>> data = await queryAllRows();
@@ -96,10 +94,18 @@ class DatabaseHelper {
       });
       final excelFileName = 'exported_data.xlsx';
       final excelFilePath = await _getFilePath(excelFileName);
-      await File(excelFilePath).writeAsBytes(await excel.encode()!);
-
-      return excelFilePath;
+      // Write the Excel file
+      final excelBytes = await excel.encode();
+      if (excelBytes != null) {
+        final file = File(excelFilePath);
+        await file.writeAsBytes(excelBytes);
+        return excelFilePath;
+      } else {
+        print('Error exporting Excel data: excelBytes is null');
+        return null;
+      }
     } else {
+      print('No data to export');
       return null;
     }
   }

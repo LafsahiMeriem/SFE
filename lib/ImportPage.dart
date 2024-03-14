@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'database_helper.dart'; // Importez votre fichier database_helper.dart
-import 'package:csv/csv.dart';
+import 'package:excel/excel.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class ImportPage extends StatelessWidget {
+class ImportPage extends StatefulWidget {
   const ImportPage({Key? key}) : super(key: key);
+
+  @override
+  _ImportPageState createState() => _ImportPageState();
+}
+
+class _ImportPageState extends State<ImportPage> {
+  List<String> _filePaths = [];
 
   @override
   Widget build(BuildContext context) {
@@ -22,25 +31,26 @@ class ImportPage extends StatelessWidget {
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () async {
-                String? filePath = await exportDataToCSV();
-                if (filePath != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Fichier CSV créé : $filePath'),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erreur lors de la création du fichier CSV'),
-                    ),
-                  );
-                }
+                await _requestPermissionAndPickFiles();
               },
-              icon: Icon(Icons.file_upload),
-              label: Text('Importer un fichier'),
+              child: Text('Importer un fichier'),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filePaths.length,
+                itemBuilder: (context, index) {
+                  final filePath = _filePaths[index];
+                  return ListTile(
+                    title: Text(filePath.split('/').last),
+                    onTap: () {
+                      _openFile(filePath);
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -48,31 +58,44 @@ class ImportPage extends StatelessWidget {
     );
   }
 
-  Future<String?> exportDataToCSV() async {
+  Future<void> _requestPermissionAndPickFiles() async {
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      List<String>? filePaths = await pickFiles();
+      if (filePaths != null) {
+        setState(() {
+          _filePaths = filePaths;
+        });
+      }
+    } else {
+      // L'utilisateur a refusé la permission, affichez un message ou effectuez une action appropriée
+      print('Permission refusée');
+    }
+  }
+
+  Future<List<String>?> pickFiles() async {
     try {
-      List<Map<String, dynamic>> data = await DatabaseHelper.instance.queryAll();
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: ['xls', 'xlsx'],
+      );
 
-      // Convertir la liste de maps en une liste de listes de données dynamiques
-      List<List<dynamic>> csvData = data.map((e) => e.values.toList()).toList();
-
-      // Créer un nouveau fichier CSV
-      final String csvFileName = 'exported_data.csv';
-      final String csvFilePath = await _getFilePath(csvFileName);
-      File csvFile = File(csvFilePath);
-      String csvString = const ListToCsvConverter().convert(csvData);
-
-      // Écrire les données dans le fichier CSV
-      await csvFile.writeAsString(csvString);
-
-      // Retourner le chemin du fichier CSV généré
-      return csvFilePath;
+      if (result != null) {
+        List<String> filePaths = result.paths.map((path) => path!).toList();
+        return filePaths;
+      }
+      return null;
     } catch (e) {
-      print('Erreur lors de la création du fichier CSV: $e');
+      print('Erreur lors de la sélection des fichiers: $e');
       return null;
     }
   }
-  Future<String> _getFilePath(String fileName) async {
-    final Directory? directory = await getExternalStorageDirectory();
-    return '${directory!.path}/$fileName';
+
+  void _openFile(String filePath) {
+    // Ici, vous pouvez implémenter la logique pour ouvrir le fichier
+    // Par exemple, vous pouvez utiliser la bibliothèque native pour ouvrir le fichier
+    // Ou vous pouvez utiliser une bibliothèque Flutter tierce si disponible
+    print('Ouverture du fichier: $filePath');
   }
 }

@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'database_helper.dart'; // Importez votre fichier database_helper.dart
 import 'package:excel/excel.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:open_file/open_file.dart';
 
 class ImportPage extends StatefulWidget {
   const ImportPage({Key? key}) : super(key: key);
@@ -93,9 +94,7 @@ class _ImportPageState extends State<ImportPage> {
   }
 
   void _openFile(String filePath) {
-    // Ici, vous pouvez implémenter la logique pour ouvrir le fichier
-    // Par exemple, vous pouvez utiliser la bibliothèque native pour ouvrir le fichier
-    // Ou vous pouvez utiliser une bibliothèque Flutter tierce si disponible
-    print('Ouverture du fichier: $filePath');
+    OpenFile.open(filePath);
+    print('Chemin du fichier: $filePath');
   }
 }

@@ -58,7 +58,7 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
   void initState() {
     super.initState();
     // Show the menu after a delay of 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 8), () {
       setState(() {
         _showMenu = true;
       });
@@ -73,13 +73,14 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
           : AppBar(
         title: const Text('Scanner Application'),
       ),
-      body: Center(
-        child: _showMenu
-            ? const MenuPage()
-            : Image.asset(
-          'assets/logo.png', // Replace 'assets/logo.png' with your logo image path
-          width: 200,
-          height: 200,
+      body: _showMenu
+          ? const MenuPage()
+          : Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/logo.png'), // Replace 'assets/logo.png' with your logo image path
+            fit: BoxFit.cover, // Cover the whole area
+          ),
         ),
       ),
     );

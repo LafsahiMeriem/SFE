@@ -77,7 +77,7 @@ class DatabaseHelper {
       final excel = Excel.createExcel();
       final sheet = excel['Sheet1'];
       sheet.appendRow([
-         'Name', 'Barcode', 'Building', 'Floor', 'Zone', 'Reference'
+        'Name', 'Barcode', 'Building', 'Floor', 'Zone', 'Reference'
       ]);
       data.forEach((row) {
         sheet.appendRow([
@@ -96,11 +96,14 @@ class DatabaseHelper {
       if (excelBytes != null) {
         final file = File(excelFilePath);
         await file.writeAsBytes(excelBytes);
+        print('Fichier Excel généré avec succès dans : $excelFilePath');
         return excelFilePath;
       } else {
         print('Error exporting Excel data: excelBytes is null');
         return null;
       }
+
+
     } else {
       print('No data to export');
       return null;

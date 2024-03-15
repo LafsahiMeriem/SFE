@@ -10,7 +10,6 @@ class DatabaseHelper {
   static final _databaseVersion = 1;
 
   static final table = 'my_table';
-  static final columnId = '_id';
   static final columnName = 'name';
   static final columnBarcode = 'barcode';
   static final columnBuilding = 'building';
@@ -43,7 +42,6 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
-            $columnId INTEGER PRIMARY KEY,
             $columnName TEXT NOT NULL,
             $columnBarcode TEXT NOT NULL,
             $columnBuilding TEXT NOT NULL,
@@ -79,11 +77,10 @@ class DatabaseHelper {
       final excel = Excel.createExcel();
       final sheet = excel['Sheet1'];
       sheet.appendRow([
-        'ID', 'Name', 'Barcode', 'Building', 'Floor', 'Zone', 'Reference'
+         'Name', 'Barcode', 'Building', 'Floor', 'Zone', 'Reference'
       ]);
       data.forEach((row) {
         sheet.appendRow([
-          row[columnId],
           row[columnName],
           row[columnBarcode],
           row[columnBuilding],
@@ -92,7 +89,7 @@ class DatabaseHelper {
           row[columnReference]
         ]);
       });
-      final excelFileName = 'exported_data.xlsx';
+      final excelFileName = 'scann_data.xlsx';
       final excelFilePath = await _getFilePath(excelFileName);
       // Write the Excel file
       final excelBytes = await excel.encode();

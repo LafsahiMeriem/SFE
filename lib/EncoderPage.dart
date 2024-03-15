@@ -31,45 +31,47 @@ class _EncodePageState extends State<EncodePage> {
       appBar: AppBar(
         title: const Text('Encoder'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Chercher un produit...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Chercher un produit...',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    _searchProduct(context, value);
+                  },
                 ),
-                onSubmitted: (value) {
-                  _searchProduct(context, value);
-                },
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text('Encoder Page'),
-          ],
+              const SizedBox(height: 20),
+              const Text(''),
+              // Ajouter un espace en bas pour laisser de la place à la barre de navigation inférieure
+              const SizedBox(height: 80),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: BottomAppBar(
-          child: Container(
-            height: 60,
-            child: EncoderBottomBar(
-              onEncodePressed: () {
-                _searchProductWithBarcode(context);
-              },
-              onNonEncodePressed: () {
-                _showFilterDialog(context);
-              },
-            ),
+
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(
+          height: 60, // Ajustez cette valeur selon vos besoins
+          child: EncoderBottomBar(
+            onEncodePressed: () {
+              _searchProductWithBarcode(context);
+            },
+            onNonEncodePressed: () {
+              _showFilterDialog(context);
+            },
           ),
         ),
       ),
+
     );
   }
 
@@ -287,28 +289,30 @@ class EncoderBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildBottomBarItem(
-          icon: Icons.search,
-          label: 'Chercher',
-          onPressed: () {
-            // Add logic for search action
-          },
-        ),
-        _buildBottomBarItem(
-          icon: Icons.qr_code,
-          label: 'Encoder',
-          onPressed: onEncodePressed,
-        ),
-        _buildBottomBarItem(
-          icon: Icons.qr_code_outlined,
-          label: 'Non-Encoder',
-          onPressed: onNonEncodePressed,
-        ),
-      ],
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildBottomBarItem(
+            icon: Icons.search,
+            label: 'Chercher',
+            onPressed: () {
+              // Add logic for search action
+            },
+          ),
+          _buildBottomBarItem(
+            icon: Icons.qr_code,
+            label: 'Encoder',
+            onPressed: onEncodePressed,
+          ),
+          _buildBottomBarItem(
+            icon: Icons.qr_code_outlined,
+            label: 'Non-Encoder',
+            onPressed: onNonEncodePressed,
+          ),
+        ],
+      ),
     );
   }
 
@@ -317,18 +321,21 @@ class EncoderBottomBar extends StatelessWidget {
     required String label,
     required VoidCallback onPressed,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(icon),
-          onPressed: onPressed,
-        ),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12),
-        ),
-      ],
+    return Container(
+      height: 60,
+      child: Column(
+        children: [
+          IconButton(
+            icon: Icon(icon),
+            onPressed: onPressed,
+          ),
+
+          Text(
+            label,
+            style: TextStyle(fontSize: 10),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -69,6 +69,15 @@ class DatabaseHelper {
     Database db = await instance.database;
     return await db.query(table);
   }
+  Future<List<Map<String, dynamic>>> queryProductByBarcode(String barcode) async {
+    Database db = await instance.database;
+    return await db.query(
+      table,
+      where: '$columnBarcode = ?',
+      whereArgs: [barcode],
+    );
+  }
+
 
   // Export data to Excel
   Future<String?> exportDataToExcel() async {

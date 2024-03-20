@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'EncoderPage.dart';
 import 'ImportPage.dart';
 import 'database_helper.dart';
-import 'ParametragePage.dart';
+import 'ParamPage.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -127,7 +127,10 @@ class MenuPage extends StatelessWidget {
           }),
           _buildMenuItem(context, 'Exporter', Icons.file_download, () {}),
           _buildMenuItem(context, 'Paramètre', Icons.settings, () {
-
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ParamPage()),
+            );
           }),
         ],
       ),

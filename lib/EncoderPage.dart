@@ -13,6 +13,7 @@ class _EncodePageState extends State<EncodePage> {
   List<String> buildings = ['building tech', 'building marjan', 'building Marjane'];
   List<String> floors = ['floor 1', 'floor 2', 'floor 3'];
   List<String> zones = ['zone droit', 'zone gauche', 'zone 1', 'zone 2', 'zone 3'];
+
   @override
   void initState() {
     super.initState();
@@ -31,36 +32,36 @@ class _EncodePageState extends State<EncodePage> {
       appBar: AppBar(
         title: const Text('Encoder'),
       ),
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Chercher un produit...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
-                  onSubmitted: (value) {
-                    _searchProduct(context, value);
-                  },
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Chercher un produit...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
                 ),
+                onSubmitted: (value) {
+                  _searchProduct(context, value);
+                },
               ),
-              const SizedBox(height: 20),
-              const Text(''),
-              // Ajouter un espace en bas pour laisser de la place à la barre de navigation inférieure
-              const SizedBox(height: 80),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            const Text(''),
+            // Ajouter un espace en bas pour laisser de la place à la barre de navigation inférieure
+            const SizedBox(height: 80),
+          ],
         ),
+      ),
 
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
-          height: 60, // Ajustez cette valeur selon vos besoins
+          height: 60,
           child: EncoderBottomBar(
             onEncodePressed: () {
               _searchProductWithBarcode(context);
@@ -84,7 +85,7 @@ class _EncodePageState extends State<EncodePage> {
             productName.toLowerCase())
     ).toList();
 
-    _showProductsDialog(context, filteredProducts);
+    _showProductsList(context, filteredProducts);
   }
 
   void _searchProductWithBarcode(BuildContext context) async {
@@ -97,72 +98,42 @@ class _EncodePageState extends State<EncodePage> {
         .isNotEmpty
     ).toList();
 
-    _showProductsDialog(context, filteredProducts);
+    _showProductsList(context, filteredProducts);
+  }
+  void _showProductsList(BuildContext context, List<Map<String, dynamic>> products) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Product Information'),
+        ),
+        body: ListView(
+          children: products.map((product) {
+            return ListTile(
+              title: Text('Name: ${product[DatabaseHelper.columnName]}'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Barcode: ${product[DatabaseHelper.columnBarcode]}'),
+                  Text('Building: ${product[DatabaseHelper.columnBuilding]}'),
+                  Text('Floor: ${product[DatabaseHelper.columnFloor]}'),
+                  Text('Zone: ${product[DatabaseHelper.columnZone]}'),
+                  Text('Reference: ${product[DatabaseHelper.columnReference]}'),
+                ],
+              ),
+              trailing: product[DatabaseHelper.columnBarcode].toString().isNotEmpty
+                  ? Icon(Icons.check, color: Colors.green)
+                  : Icon(Icons.close, color: Colors.red),
+              onTap: () {
+                // Action when tapping on a product
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }));
   }
 
-  void _showProductsDialog(BuildContext context,
-      List<Map<String, dynamic>> products) {
-    if (products.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Product Information'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: products.map((product) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Product Name: ${product[DatabaseHelper
-                          .columnName]}'),
-                      Text('Barcode: ${product[DatabaseHelper.columnBarcode]}'),
-                      Text('Building: ${product[DatabaseHelper
-                          .columnBuilding]}'),
-                      Text('Floor: ${product[DatabaseHelper.columnFloor]}'),
-                      Text('Zone: ${product[DatabaseHelper.columnZone]}'),
-                      Text('Reference: ${product[DatabaseHelper
-                          .columnReference]}'),
-                      const Divider(),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Product Not Found'),
-            content: const Text(
-                'No product found with the specified condition.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
+
 
   void _showFilterDialog(BuildContext context) {
     String selectedBuilding = buildings.first;
@@ -221,7 +192,7 @@ class _EncodePageState extends State<EncodePage> {
               ),
             ],
           ),
-          actions: [
+          actions        : [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -268,6 +239,7 @@ class _EncodePageState extends State<EncodePage> {
           (product[DatabaseHelper.columnName] == null ||
               product[DatabaseHelper.columnName]
                   .toString()
+
                   .isEmpty) &&
           (product[DatabaseHelper.columnReference] == null ||
               product[DatabaseHelper.columnReference]
@@ -276,10 +248,9 @@ class _EncodePageState extends State<EncodePage> {
       ).toList();
     }
 
-    _showProductsDialog(context, filteredProducts);
+    _showProductsList(context, filteredProducts);
   }
 }
-
 
 class EncoderBottomBar extends StatelessWidget {
   final VoidCallback onEncodePressed;

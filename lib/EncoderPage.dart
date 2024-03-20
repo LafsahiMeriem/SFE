@@ -110,6 +110,9 @@ class _EncodePageState extends State<EncodePage> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Product Information'),
+          actions: [
+
+          ],
         ),
         body: ListView(
           children: products.map((product) {
@@ -138,6 +141,7 @@ class _EncodePageState extends State<EncodePage> {
     }));
   }
 
+
   void _showProductsListWithEmptyBarcode(BuildContext context) async {
     final DatabaseHelper dbHelper = DatabaseHelper.instance;
     final List<Map<String, dynamic>> products = await dbHelper.queryAllRows();
@@ -153,6 +157,14 @@ class _EncodePageState extends State<EncodePage> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Product Information with Empty Barcode'),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: () {
+                  _refreshProductList(context);
+                },
+              ),
+            ],
           ),
           body: ListView.builder(
             itemCount: filteredProducts.length,
@@ -188,6 +200,7 @@ class _EncodePageState extends State<EncodePage> {
       _showProductsList(context, filteredProducts);
     }
   }
+
 
   void _showBarcodeInputDialog(BuildContext context, Map<String, dynamic> product) {
     TextEditingController _barcodeController = TextEditingController(); // Déplacer cette ligne ici pour éviter l'erreur

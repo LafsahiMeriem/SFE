@@ -116,10 +116,10 @@ class MenuPage extends StatelessWidget {
             );
           }),
           _buildMenuItem(context, 'Encoder', Icons.qr_code, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => EncodePage()),
-            );
+          //  Navigator.push(
+          //    context,
+            //    MaterialPageRoute(builder: (context) => EncodePage()),
+            // );
           }),
           _buildMenuItem(context, 'Scan', Icons.qr_code_scanner, () {
             // Start barcode or QR code scan
@@ -168,6 +168,8 @@ class MenuPage extends StatelessWidget {
   }
 }
 
+
+
 class Ajouter extends StatefulWidget {
   const Ajouter({Key? key}) : super(key: key);
 
@@ -178,21 +180,10 @@ class Ajouter extends StatefulWidget {
 class _AjouterState extends State<Ajouter> {
   final TextEditingController _productController = TextEditingController();
   final TextEditingController _barcodeController = TextEditingController();
-  final TextEditingController _buildingController = TextEditingController();
-  final TextEditingController _floorController = TextEditingController();
-  final TextEditingController _zoneController = TextEditingController();
-  final TextEditingController _referenceController = TextEditingController();
-
-  @override
-  void dispose() {
-    _productController.dispose();
-    _barcodeController.dispose();
-    _buildingController.dispose();
-    _floorController.dispose();
-    _zoneController.dispose();
-    _referenceController.dispose();
-    super.dispose();
-  }
+  int? _selectedBuildingId;
+  int? _selectedZoneId;
+  int? _selectedFloorId;
+  int? _selectedOfficeId;
 
   @override
   Widget build(BuildContext context) {
@@ -210,13 +201,29 @@ class _AjouterState extends State<Ajouter> {
               const SizedBox(height: 16),
               _buildTextField('Code barre', _barcodeController),
               const SizedBox(height: 16),
-              _buildTextField('Bâtiment', _buildingController),
+              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
+                setState(() {
+                  _selectedBuildingId = int.parse(value as String);
+                });
+              }),
               const SizedBox(height: 16),
-              _buildTextField('Étage', _floorController),
+              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId, (value) {
+                setState(() {
+                  _selectedZoneId = int.parse(value as String);
+                });
+              }),
               const SizedBox(height: 16),
-              _buildTextField('Zone', _zoneController),
+              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId, (value) {
+                setState(() {
+                  _selectedFloorId = int.parse(value as String);
+                });
+              }),
               const SizedBox(height: 16),
-              _buildTextField('Référence', _referenceController),
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId, (value) {
+                setState(() {
+                  _selectedOfficeId = int.parse(value as String);
+                });
+              }),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _ajouter,
@@ -228,7 +235,6 @@ class _AjouterState extends State<Ajouter> {
       ),
     );
   }
-
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return TextFormField(
       controller: controller,
@@ -239,37 +245,83 @@ class _AjouterState extends State<Ajouter> {
     );
   }
 
+  Widget _buildDropdownField(String labelText, Future<List<Map<String, dynamic>>> items, int? selectedValue, void Function(int?) onChanged) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: items,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          List<Map<String, dynamic>> data = snapshot.data ?? [];
+          List<int> ids = data.map((e) => e['id'] as int).toList();
+          return DropdownButtonFormField<String>(
+            value: selectedValue != null ? selectedValue.toString() : null,
+            onChanged: (String? value) {
+              onChanged(value != null ? int.tryParse(value) : null);
+            },
+            items: ids.map((int value) {
+              return DropdownMenuItem<String>(
+                value: value.toString(),
+                child: Text(value.toString()),
+              );
+            }).toList(),
+            decoration: InputDecoration(
+              labelText: labelText,
+              border: OutlineInputBorder(),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+
   void _ajouter() async {
     final String product = _productController.text;
     final String barcode = _barcodeController.text;
-    final String building = _buildingController.text;
-    final String floor = _floorController.text;
-    final String zone = _zoneController.text;
-    final String reference = _referenceController.text;
 
-    await DatabaseHelper.instance.insert({
-      'name': product,
-      'barcode': barcode,
-      'building': building,
-      'floor': floor,
-      'zone': zone,
-      'reference': reference,
-    });
+    // Utiliser les valeurs sélectionnées pour les identifiants de bâtiment, de zone, d'étage et de bureau
+    final int? selectedBuildingId = _selectedBuildingId;
+    final int? selectedZoneId = _selectedZoneId;
+    final int? selectedFloorId = _selectedFloorId;
+    final int? selectedOfficeId = _selectedOfficeId;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Données insérées dans la base de données.'),
-      ),
-    );
+    // Vérifier si toutes les valeurs nécessaires sont sélectionnées
+    if (selectedBuildingId != null &&
+        selectedZoneId != null &&
+        selectedFloorId != null &&
+        selectedOfficeId != null) {
+      // Utiliser les identifiants sélectionnés comme vous le souhaitez, par exemple, les stocker dans la base de données
+      // Votre logique de stockage dans la base de données ici
 
-    _productController.clear();
-    _barcodeController.clear();
-    _buildingController.clear();
-    _floorController.clear();
-    _zoneController.clear();
-    _referenceController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Données insérées dans la base de données.'),
+        ),
+      );
+
+      _productController.clear();
+      _barcodeController.clear();
+      setState(() {
+        _selectedBuildingId = null;
+        _selectedZoneId = null;
+        _selectedFloorId = null;
+        _selectedOfficeId = null;
+      });
+    } else {
+      // Si une des valeurs nécessaires n'est pas sélectionnée, affichez un message d'erreur
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner une valeur pour chaque champ.'),
+        ),
+      );
+    }
   }
+
 }
+
 
 void startScan(BuildContext context) {
   const MethodChannel methodChannel =

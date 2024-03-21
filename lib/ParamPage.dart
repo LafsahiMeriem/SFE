@@ -42,7 +42,7 @@ class _ParamPageState extends State<ParamPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(' Bâtiments '),
+        title: Text('Bâtiments'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -54,7 +54,19 @@ class _ParamPageState extends State<ParamPage> {
                 itemCount: buildings.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(buildings[index]),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(buildings[index]),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            _removeBuilding(index);
+                          },
+                        ),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -113,7 +125,20 @@ class _ParamPageState extends State<ParamPage> {
       child: Text('Ajouter un bâtiment'),
     );
   }
+
+  void _removeBuilding(int index) async {
+    setState(() {
+      buildings.removeAt(index);
+      _saveBuildings();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Bâtiment supprimé avec succès'),
+      ),
+    );
+  }
 }
+
 
 class ZonePage extends StatefulWidget {
   final String buildingName;
@@ -129,14 +154,13 @@ class _ZonePageState extends State<ZonePage> {
   bool _isAddingZone = false;
   List<String> zones = [];
 
-
   @override
   void initState() {
     super.initState();
     _zoneController = TextEditingController();
     _loadZones();
-
   }
+
   Future<void> _loadZones() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -144,10 +168,13 @@ class _ZonePageState extends State<ZonePage> {
     });
   }
 
+
+
   Future<void> _saveZones() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setStringList('zones', zones);
   }
+
 
 
   @override
@@ -155,11 +182,12 @@ class _ZonePageState extends State<ZonePage> {
     _zoneController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Les zones du ${widget.buildingName}'),
+        title: Text('Les zones de ${widget.buildingName}'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -171,14 +199,25 @@ class _ZonePageState extends State<ZonePage> {
                 itemCount: zones.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(zones[index]),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(zones[index]),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            _removeZone(index);
+                          },
+                        ),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => FloorPage(zones[index])),
                       );
                     },
-
                   );
                 },
               ),
@@ -196,9 +235,9 @@ class _ZonePageState extends State<ZonePage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
-          controller:_zoneController,
+          controller: _zoneController,
           decoration: InputDecoration(
-            hintText: 'Nom du zone',
+            hintText: 'Nom de la zone',
           ),
         ),
         ElevatedButton(
@@ -207,13 +246,13 @@ class _ZonePageState extends State<ZonePage> {
             if (zoneName.isNotEmpty) {
               setState(() {
                 zones.add(zoneName);
-                _saveZones(); // Sauvegarde des bâtiments
+                _saveZones();
                 _zoneController.clear();
-                _isAddingZone  = false;
+                _isAddingZone = false;
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Zone ajouté avec succès: $zoneName'),
+                  content: Text('Zone ajoutée avec succès: $zoneName'),
                 ),
               );
             }
@@ -225,13 +264,26 @@ class _ZonePageState extends State<ZonePage> {
         : ElevatedButton(
       onPressed: () {
         setState(() {
-          _isAddingZone  = true;
+          _isAddingZone = true;
         });
       },
       child: Text('Ajouter une zone'),
     );
   }
+
+  void _removeZone(int index) {
+    setState(() {
+      zones.removeAt(index);
+      _saveZones();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Zone supprimée avec succès'),
+      ),
+    );
+  }
 }
+
 class FloorPage extends StatefulWidget {
   final String zoneName;
 
@@ -286,14 +338,25 @@ class _FloorPageState extends State<FloorPage> {
                 itemCount: floors.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(floors[index]),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(floors[index]),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            _removeFloor(index);
+                          },
+                        ),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => OfficePage(floors[index])),
                       );
                     },
-
                   );
                 },
               ),
@@ -336,7 +399,20 @@ class _FloorPageState extends State<FloorPage> {
       ],
     );
   }
+
+  void _removeFloor(int index) {
+    setState(() {
+      floors.removeAt(index);
+      _saveFloors();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Étage supprimé avec succès'),
+      ),
+    );
+  }
 }
+
 
 class OfficePage extends StatefulWidget {
   final String floorName;

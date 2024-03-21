@@ -10,13 +10,16 @@ class ParamPage extends StatefulWidget {
 
 class _ParamPageState extends State<ParamPage> {
   late TextEditingController _buildingController;
+  late TextEditingController _searchController; // Ajout du contrôleur de recherche
   bool _isAddingBuilding = false;
   List<String> buildings = [];
+  List<String> filteredBuildings = [];
 
   @override
   void initState() {
     super.initState();
     _buildingController = TextEditingController();
+    _searchController = TextEditingController(); // Initialisation du contrôleur de recherche
     _loadBuildings();
   }
 
@@ -24,6 +27,7 @@ class _ParamPageState extends State<ParamPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       buildings = prefs.getStringList('buildings') ?? [];
+      filteredBuildings = List.from(buildings);
     });
   }
 
@@ -35,6 +39,7 @@ class _ParamPageState extends State<ParamPage> {
   @override
   void dispose() {
     _buildingController.dispose();
+    _searchController.dispose(); // Disposer du contrôleur de recherche
     super.dispose();
   }
 
@@ -49,15 +54,23 @@ class _ParamPageState extends State<ParamPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextField(
+              controller: _searchController, // Utilisation du contrôleur de recherche pour le champ de recherche
+              decoration: InputDecoration(
+                hintText: 'Rechercher un bâtiment',
+              ),
+              onChanged: _filterBuildings,
+            ),
+            _buildAddBuildingButton(),
             Expanded(
               child: ListView.builder(
-                itemCount: buildings.length,
+                itemCount: filteredBuildings.length,
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Row(
                       children: [
                         Expanded(
-                          child: Text(buildings[index]),
+                          child: Text(filteredBuildings[index]),
                         ),
                         IconButton(
                           icon: Icon(Icons.delete),
@@ -70,18 +83,23 @@ class _ParamPageState extends State<ParamPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ZonePage(buildings[index])),
+                        MaterialPageRoute(builder: (context) => ZonePage(filteredBuildings[index])),
                       );
                     },
                   );
                 },
               ),
             ),
-            _buildAddBuildingButton(),
           ],
         ),
       ),
     );
+  }
+
+  void _filterBuildings(String query) {
+    setState(() {
+      filteredBuildings = buildings.where((building) => building.toLowerCase().contains(query.toLowerCase())).toList();
+    });
   }
 
   Widget _buildAddBuildingButton() {
@@ -90,7 +108,7 @@ class _ParamPageState extends State<ParamPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
-          controller: _buildingController,
+          controller: _buildingController, // Utilisation du contrôleur de bâtiment pour le champ d'ajout de bâtiment
           decoration: InputDecoration(
             hintText: 'Nom du bâtiment',
           ),
@@ -104,6 +122,7 @@ class _ParamPageState extends State<ParamPage> {
                 _saveBuildings(); // Sauvegarde des bâtiments
                 _buildingController.clear();
                 _isAddingBuilding = false;
+                filteredBuildings = List.from(buildings);
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -130,6 +149,7 @@ class _ParamPageState extends State<ParamPage> {
     setState(() {
       buildings.removeAt(index);
       _saveBuildings();
+      filteredBuildings = List.from(buildings);
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -138,6 +158,8 @@ class _ParamPageState extends State<ParamPage> {
     );
   }
 }
+
+
 
 
 class ZonePage extends StatefulWidget {
@@ -164,18 +186,14 @@ class _ZonePageState extends State<ZonePage> {
   Future<void> _loadZones() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      zones = prefs.getStringList('zones') ?? [];
+      zones = prefs.getStringList('${widget.buildingName}_zones') ?? [];
     });
   }
 
-
-
   Future<void> _saveZones() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('zones', zones);
+    prefs.setStringList('${widget.buildingName}_zones', zones);
   }
-
-
 
   @override
   void dispose() {

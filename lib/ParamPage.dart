@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'database_helper.dart';
+
 
 class ParamPage extends StatefulWidget {
   const ParamPage({Key? key}) : super(key: key);
@@ -7,14 +9,12 @@ class ParamPage extends StatefulWidget {
   @override
   _ParamPageState createState() => _ParamPageState();
 }
-
 class _ParamPageState extends State<ParamPage> {
   late TextEditingController _buildingController;
   late TextEditingController _searchController; // Ajout du contrôleur de recherche
   bool _isAddingBuilding = false;
   List<String> buildings = [];
   List<String> filteredBuildings = [];
-
   @override
   void initState() {
     super.initState();
@@ -83,8 +83,9 @@ class _ParamPageState extends State<ParamPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ZonePage(filteredBuildings[index])),
+                        MaterialPageRoute(builder: (context) => ZonePage(filteredBuildings[index], index)),
                       );
+
                     },
                   );
                 },
@@ -108,22 +109,21 @@ class _ParamPageState extends State<ParamPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
-          controller: _buildingController, // Utilisation du contrôleur de bâtiment pour le champ d'ajout de bâtiment
+          controller: _buildingController,
           decoration: InputDecoration(
             hintText: 'Nom du bâtiment',
           ),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             String buildingName = _buildingController.text.trim();
             if (buildingName.isNotEmpty) {
+              await DatabaseHelper.instance.insertBuilding(buildingName); // Insertion du bâtiment dans la base de données
               setState(() {
-                buildings.add(buildingName);
-                _saveBuildings(); // Sauvegarde des bâtiments
                 _buildingController.clear();
                 _isAddingBuilding = false;
-                filteredBuildings = List.from(buildings);
               });
+              _loadBuildings(); // Recharger la liste des bâtiments depuis la base de données
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Bâtiment ajouté avec succès: $buildingName'),
@@ -160,19 +160,19 @@ class _ParamPageState extends State<ParamPage> {
 }
 
 
-
-
 class ZonePage extends StatefulWidget {
   final String buildingName;
+  final int buildingId;
 
-  const ZonePage(this.buildingName);
-
+  const ZonePage(this.buildingName, this.buildingId);
   @override
   _ZonePageState createState() => _ZonePageState();
 }
 
 class _ZonePageState extends State<ZonePage> {
   late TextEditingController _zoneController;
+  late DatabaseHelper databaseHelper;
+
   bool _isAddingZone = false;
   List<String> zones = [];
 
@@ -180,6 +180,8 @@ class _ZonePageState extends State<ZonePage> {
   void initState() {
     super.initState();
     _zoneController = TextEditingController();
+    databaseHelper = DatabaseHelper.instance;
+
     _loadZones();
   }
 
@@ -259,14 +261,15 @@ class _ZonePageState extends State<ZonePage> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             String zoneName = _zoneController.text.trim();
             if (zoneName.isNotEmpty) {
+              // Utilisez widget.buildingName pour le nom du bâtiment
+              await databaseHelper.insertZone(widget.buildingId, zoneName);
               setState(() {
-                zones.add(zoneName);
-                _saveZones();
-                _zoneController.clear();
                 _isAddingZone = false;
+                zones.add(zoneName); // Ajoutez également la zone à la liste locale
+                _saveZones(); // Enregistrez les zones dans SharedPreferences
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -302,6 +305,8 @@ class _ZonePageState extends State<ZonePage> {
   }
 }
 
+
+
 class FloorPage extends StatefulWidget {
   final String zoneName;
 
@@ -310,10 +315,12 @@ class FloorPage extends StatefulWidget {
   @override
   _FloorPageState createState() => _FloorPageState();
 }
-
 class _FloorPageState extends State<FloorPage> {
   late TextEditingController _floorController;
   List<String> floors = [];
+  late DatabaseHelper databaseHelper;
+  late int? selectedZoneId;
+
 
   @override
   void initState() {
@@ -397,12 +404,12 @@ class _FloorPageState extends State<FloorPage> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             String floorName = _floorController.text.trim();
             if (floorName.isNotEmpty) {
+              // Utiliser DatabaseHelper pour insérer le nouvel étage
+              await databaseHelper.insertFloor(selectedZoneId!, floorName);
               setState(() {
-                floors.add(floorName);
-                _saveFloors();
                 _floorController.clear();
               });
               ScaffoldMessenger.of(context).showSnackBar(
@@ -417,7 +424,6 @@ class _FloorPageState extends State<FloorPage> {
       ],
     );
   }
-
   void _removeFloor(int index) {
     setState(() {
       floors.removeAt(index);
@@ -432,6 +438,7 @@ class _FloorPageState extends State<FloorPage> {
 }
 
 
+
 class OfficePage extends StatefulWidget {
   final String floorName;
 
@@ -440,10 +447,11 @@ class OfficePage extends StatefulWidget {
   @override
   _OfficePageState createState() => _OfficePageState();
 }
-
 class _OfficePageState extends State<OfficePage> {
   late TextEditingController _officeController;
   List<String> offices = [];
+  late DatabaseHelper databaseHelper;
+  late int? selectedFloorId;
 
   @override
   void initState() {
@@ -509,12 +517,12 @@ class _OfficePageState extends State<OfficePage> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             String officeName = _officeController.text.trim();
             if (officeName.isNotEmpty) {
+              // Utiliser DatabaseHelper pour insérer le nouveau bureau
+              await databaseHelper.insertOffice(selectedFloorId!, officeName);
               setState(() {
-                offices.add(officeName);
-                _saveOffices();
                 _officeController.clear();
               });
               ScaffoldMessenger.of(context).showSnackBar(
@@ -528,8 +536,7 @@ class _OfficePageState extends State<OfficePage> {
         ),
       ],
     );
-  }
-}
+  }}
 
 
 void main() {

@@ -201,25 +201,25 @@ class _AjouterState extends State<Ajouter> {
               const SizedBox(height: 16),
               _buildTextField('Code barre', _barcodeController),
               const SizedBox(height: 16),
-              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
+              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId as String?, (value) {
                 setState(() {
                   _selectedBuildingId = int.parse(value as String);
                 });
               }),
               const SizedBox(height: 16),
-              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId, (value) {
+              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId as String?, (value) {
                 setState(() {
                   _selectedZoneId = int.parse(value as String);
                 });
               }),
               const SizedBox(height: 16),
-              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId, (value) {
+              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId as String?, (value) {
                 setState(() {
                   _selectedFloorId = int.parse(value as String);
                 });
               }),
               const SizedBox(height: 16),
-              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId, (value) {
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
                 setState(() {
                   _selectedOfficeId = int.parse(value as String);
                 });
@@ -245,7 +245,7 @@ class _AjouterState extends State<Ajouter> {
     );
   }
 
-  Widget _buildDropdownField(String labelText, Future<List<Map<String, dynamic>>> items, int? selectedValue, void Function(int?) onChanged) {
+  Widget _buildDropdownField(String labelText, Future<List<Map<String, dynamic>>> items, String? selectedValue, void Function(String?) onChanged) {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: items,
       builder: (context, snapshot) {
@@ -255,16 +255,14 @@ class _AjouterState extends State<Ajouter> {
           return Text('Error: ${snapshot.error}');
         } else {
           List<Map<String, dynamic>> data = snapshot.data ?? [];
-          List<int> ids = data.map((e) => e['id'] as int).toList();
+          List<String> names = data.map((e) => e['name'].toString()).toList();
           return DropdownButtonFormField<String>(
-            value: selectedValue != null ? selectedValue.toString() : null,
-            onChanged: (String? value) {
-              onChanged(value != null ? int.tryParse(value) : null);
-            },
-            items: ids.map((int value) {
+            value: selectedValue,
+            onChanged: onChanged,
+            items: names.map((String name) {
               return DropdownMenuItem<String>(
-                value: value.toString(),
-                child: Text(value.toString()),
+                value: name,
+                child: Text(name),
               );
             }).toList(),
             decoration: InputDecoration(
@@ -283,17 +281,16 @@ class _AjouterState extends State<Ajouter> {
     final String barcode = _barcodeController.text;
 
     // Utiliser les valeurs sélectionnées pour les identifiants de bâtiment, de zone, d'étage et de bureau
-    final int? selectedBuildingId = _selectedBuildingId;
-    final int? selectedZoneId = _selectedZoneId;
-    final int? selectedFloorId = _selectedFloorId;
-    final int? selectedOfficeId = _selectedOfficeId;
+    final String? selectedBuildingId = _selectedBuildingId as String?;
+    final String? selectedZoneId = _selectedZoneId as String?;
+    final String? selectedFloorId = _selectedFloorId as String?;
+    final String? selectedOfficeId = _selectedOfficeId as String?;
 
     // Vérifier si toutes les valeurs nécessaires sont sélectionnées
     if (selectedBuildingId != null &&
         selectedZoneId != null &&
         selectedFloorId != null &&
         selectedOfficeId != null) {
-      // Utiliser les identifiants sélectionnés comme vous le souhaitez, par exemple, les stocker dans la base de données
       // Votre logique de stockage dans la base de données ici
 
       ScaffoldMessenger.of(context).showSnackBar(

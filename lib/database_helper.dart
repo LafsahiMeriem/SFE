@@ -127,6 +127,17 @@ class DatabaseHelper {
     return await db.query(floorsTable, where: 'zone_id = ?', whereArgs: [zoneId]);
   }
 
+  Future<void> deleteFloor(int zoneId, String floorName) async {
+    final db = await instance.database;
+    await db.delete(
+      floorsTable,
+      where: 'zone_id = ? AND name = ?',
+      whereArgs: [zoneId, floorName],
+    );
+    print('Floor deleted successfully: $floorName');
+  }
+
+
   // Office CRUD operations
 
   Future<void> insertOffice(int floorId, String name) async {

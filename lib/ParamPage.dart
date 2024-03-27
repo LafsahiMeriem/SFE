@@ -237,9 +237,10 @@ class _ZonePageState extends State<ZonePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => FloorPage(zones[index])),
+                        MaterialPageRoute(builder: (context) => FloorPage(zones[index], zoneId: index)),
                       );
                     },
+
                   );
                 },
               ),
@@ -311,8 +312,10 @@ class _ZonePageState extends State<ZonePage> {
 
 class FloorPage extends StatefulWidget {
   final String zoneName;
+  final int zoneId;
 
-  const FloorPage(this.zoneName);
+
+  const FloorPage(this.zoneName, {required this.zoneId});
 
   @override
   _FloorPageState createState() => _FloorPageState();
@@ -329,6 +332,7 @@ class _FloorPageState extends State<FloorPage> {
     super.initState();
     _floorController = TextEditingController();
     databaseHelper = DatabaseHelper.instance;
+    _onZoneSelected(widget.zoneId);
     _loadFloors();
   }
 
@@ -338,6 +342,7 @@ class _FloorPageState extends State<FloorPage> {
       floors = prefs.getStringList('${widget.zoneName}_floors') ?? [];
     });
   }
+
 
   Future<void> _saveFloors() async {
     final prefs = await SharedPreferences.getInstance();
@@ -454,6 +459,7 @@ class _FloorPageState extends State<FloorPage> {
     );
   }
 }
+
 
 
 

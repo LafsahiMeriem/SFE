@@ -9,17 +9,19 @@ class ParamPage extends StatefulWidget {
   @override
   _ParamPageState createState() => _ParamPageState();
 }
+
 class _ParamPageState extends State<ParamPage> {
   late TextEditingController _buildingController;
-  late TextEditingController _searchController; // Ajout du contrôleur de recherche
+  late TextEditingController _searchController;
   bool _isAddingBuilding = false;
   List<String> buildings = [];
   List<String> filteredBuildings = [];
+
   @override
   void initState() {
     super.initState();
     _buildingController = TextEditingController();
-    _searchController = TextEditingController(); // Initialisation du contrôleur de recherche
+    _searchController = TextEditingController();
     _loadBuildings();
   }
 
@@ -39,7 +41,7 @@ class _ParamPageState extends State<ParamPage> {
   @override
   void dispose() {
     _buildingController.dispose();
-    _searchController.dispose(); // Disposer du contrôleur de recherche
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -55,7 +57,7 @@ class _ParamPageState extends State<ParamPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
-              controller: _searchController, // Utilisation du contrôleur de recherche pour le champ de recherche
+              controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Rechercher un bâtiment',
               ),
@@ -85,7 +87,6 @@ class _ParamPageState extends State<ParamPage> {
                         context,
                         MaterialPageRoute(builder: (context) => ZonePage(filteredBuildings[index], index)),
                       );
-
                     },
                   );
                 },
@@ -118,12 +119,13 @@ class _ParamPageState extends State<ParamPage> {
           onPressed: () async {
             String buildingName = _buildingController.text.trim();
             if (buildingName.isNotEmpty) {
+              // Utilisez la méthode insertBuilding de la classe DatabaseHelper pour insérer le nouveau bâtiment
               await DatabaseHelper.instance.insertBuilding(buildingName);
               setState(() {
                 _buildingController.clear();
                 _isAddingBuilding = false;
-                buildings.add(buildingName); // Ajouter le nouveau bâtiment à la liste
-                filteredBuildings = List.from(buildings); // Mettre à jour la liste filtrée
+                buildings.add(buildingName);
+                filteredBuildings = List.from(buildings);
               });
               _saveBuildings();
               ScaffoldMessenger.of(context).showSnackBar(
@@ -148,16 +150,24 @@ class _ParamPageState extends State<ParamPage> {
   }
 
   void _removeBuilding(int index) async {
-    setState(() {
-      buildings.removeAt(index);
-      filteredBuildings = List.from(buildings); // Mettre à jour la liste filtrée
-      _saveBuildings();
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Bâtiment supprimé avec succès'),
-      ),
-    );
+    if (index >= 0 && index < buildings.length) {
+      String buildingName = buildings[index];
+
+      await DatabaseHelper.instance.deleteBuilding(buildingName);
+
+      setState(() {
+        buildings.removeAt(index);
+        filteredBuildings = List.from(buildings);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bâtiment supprimé avec succès'),
+        ),
+      );
+    } else {
+      print('Index out of bounds.');
+    }
   }
 }
 

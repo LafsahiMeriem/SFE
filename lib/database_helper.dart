@@ -99,6 +99,14 @@ class DatabaseHelper {
     return await db.query(buildingsTable);
   }
 
+  Future<void> deleteBuilding(String buildingName) async {
+    final db = await instance.database;
+    await db.delete(buildingsTable, where: 'name = ?', whereArgs: [buildingName]);
+    print('Building deleted successfully: $buildingName');
+  }
+
+
+
   // Zone CRUD operations
 
   Future<void> insertZone(int buildingId, String name) async {

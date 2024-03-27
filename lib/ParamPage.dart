@@ -305,17 +305,26 @@ class _ZonePageState extends State<ZonePage> {
     );
   }
 
-  void _removeZone(int index) {
-    setState(() {
-      zones.removeAt(index);
-      _saveZones();
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Zone supprimée avec succès'),
-      ),
-    );
+  void _removeZone(int index) async {
+    if (index >= 0 && index < zones.length) {
+      setState(() {
+        String zoneName = zones[index];
+        zones.removeAt(index);
+        _saveZones();
+      });
+
+      await databaseHelper.deleteZone(widget.buildingId, index); // Appel de la méthode pour supprimer la zone de la base de données
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Zone supprimée avec succès'),
+        ),
+      );
+    } else {
+      print('Index out of bounds.');
+    }
   }
+
 }
 
 
@@ -399,8 +408,11 @@ class _FloorPageState extends State<FloorPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => OfficePage(floors[index])),
+                        MaterialPageRoute(
+                          builder: (context) => OfficePage(floors[index], widget.zoneId),
+                        ),
                       );
+
                     },
                   );
                 },
@@ -473,26 +485,28 @@ class _FloorPageState extends State<FloorPage> {
 
 
 
-
-
 class OfficePage extends StatefulWidget {
   final String floorName;
+  final int zoneId;
+  final int? selectedFloorId; // Ajout
+  final int? selectedZoneId; // Ajout
 
-  const OfficePage(this.floorName);
+  const OfficePage(this.floorName, this.zoneId, {this.selectedFloorId, this.selectedZoneId}); // Modification
 
   @override
   _OfficePageState createState() => _OfficePageState();
 }
+
 class _OfficePageState extends State<OfficePage> {
   late TextEditingController _officeController;
   List<String> offices = [];
   late DatabaseHelper databaseHelper;
-  late int? selectedFloorId;
 
   @override
   void initState() {
     super.initState();
     _officeController = TextEditingController();
+    databaseHelper = DatabaseHelper.instance;
     _loadOffices();
   }
 
@@ -503,15 +517,9 @@ class _OfficePageState extends State<OfficePage> {
     });
   }
 
-  Future<void> _saveOffices() async {
+  Future<void> _saveOffice() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setStringList('${widget.floorName}_offices', offices);
-  }
-
-  @override
-  void dispose() {
-    _officeController.dispose();
-    super.dispose();
   }
 
   @override
@@ -531,6 +539,12 @@ class _OfficePageState extends State<OfficePage> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(offices[index]),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        _removeOffice(index);
+                      },
+                    ),
                   );
                 },
               ),
@@ -556,14 +570,28 @@ class _OfficePageState extends State<OfficePage> {
           onPressed: () async {
             String officeName = _officeController.text.trim();
             if (officeName.isNotEmpty) {
-              // Utiliser DatabaseHelper pour insérer le nouveau bureau
-              await databaseHelper.insertOffice(selectedFloorId!, officeName);
-              setState(() {
-                _officeController.clear();
-              });
+              if (widget.selectedFloorId != null && widget.selectedZoneId != null) { // Modification
+                await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.selectedZoneId!); // Modification
+                setState(() {
+                  offices.add(officeName);
+                  _officeController.clear();
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Bureau ajouté avec succès: $officeName'),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Veuillez sélectionner un étage et une zone'),
+                  ),
+                );
+              }
+            } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Bureau ajouté avec succès: $officeName'),
+                  content: Text('Veuillez saisir un nom de bureau valide'),
                 ),
               );
             }
@@ -572,7 +600,28 @@ class _OfficePageState extends State<OfficePage> {
         ),
       ],
     );
-  }}
+  }
+
+  void _removeOffice(int index) {
+    if (index >= 0 && index < offices.length) {
+      setState(() {
+        String removedOfficeName = offices.removeAt(index);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bureau supprimé avec succès'),
+        ),
+      );
+    } else {
+      print('Index out of bounds.');
+    }
+  }
+}
+
+
+
+
+
 
 
 void main() {

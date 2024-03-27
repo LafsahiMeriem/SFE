@@ -121,6 +121,13 @@ class DatabaseHelper {
     return await db.query(zonesTable, where: 'building_id = ?', whereArgs: [buildingId]);
   }
 
+  Future<void> deleteZone(int buildingId, int zoneId) async {
+    final db = await instance.database;
+    await db.delete(zonesTable, where: 'building_id = ? AND id = ?', whereArgs: [buildingId, zoneId]);
+    print('Zone deleted successfully: $zoneId');
+  }
+
+
   // Floor CRUD operations
 
   Future<void> insertFloor(int zoneId, String name) async {
@@ -148,15 +155,27 @@ class DatabaseHelper {
 
   // Office CRUD operations
 
-  Future<void> insertOffice(int floorId, String name) async {
+  Future<void> insertOffice(int floorId, String name, int zoneId) async {
     final db = await instance.database;
-    await db.insert(officesTable, {'floor_id': floorId, 'name': name});
+    await db.insert(officesTable, {'floor_id': floorId, 'zone_id': zoneId, 'name': name});
     print('Office inserted successfully: $name');
-
   }
+
 
   Future<List<Map<String, dynamic>>> getOfficesForFloor(int floorId) async {
     final db = await instance.database;
     return await db.query(officesTable, where: 'floor_id = ?', whereArgs: [floorId]);
   }
+
+  Future<void> deleteOffice(String floorName, String officeName) async {
+    final db = await instance.database;
+    await db.delete(
+      officesTable,
+      where: 'floor_id = (SELECT id FROM $floorsTable WHERE name = ?) AND name = ?',
+      whereArgs: [floorName, officeName],
+    );
+    print('Office deleted successfully: $officeName');
+  }
+
+
 }

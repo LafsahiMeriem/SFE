@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -28,6 +29,13 @@ class DatabaseHelper {
     );
   }
 
+  selectData({required String sql}) async {
+    Database? db = await database;
+    List<Map> response = await db.rawQuery(sql);
+    return response;
+  }
+
+
   Future<void> _createDatabase(Database db, int version) async {
     // Create buildings table
     await db.execute('''
@@ -44,6 +52,7 @@ class DatabaseHelper {
         building_id INTEGER,
         name TEXT,
         FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
+
       )
     ''');
 
@@ -66,9 +75,17 @@ class DatabaseHelper {
         FOREIGN KEY (floor_id) REFERENCES $floorsTable(id)
       )
     ''');
+    print("database on created ==============================");
   }
 
   // Building CRUD operations
+  Future<void> deleteDatabaseFile() async {
+    String databasePath = await getDatabasesPath();
+    String path = join(databasePath, 'your_database.db');
+    await deleteDatabase(path);
+    _database = null;
+    log("Database deleted");
+  }
 
   Future<void> insertBuilding(String name) async {
     final db = await instance.database;

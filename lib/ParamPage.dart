@@ -118,12 +118,14 @@ class _ParamPageState extends State<ParamPage> {
           onPressed: () async {
             String buildingName = _buildingController.text.trim();
             if (buildingName.isNotEmpty) {
-              await DatabaseHelper.instance.insertBuilding(buildingName); // Insertion du bâtiment dans la base de données
+              await DatabaseHelper.instance.insertBuilding(buildingName);
               setState(() {
                 _buildingController.clear();
                 _isAddingBuilding = false;
+                buildings.add(buildingName); // Ajouter le nouveau bâtiment à la liste
+                filteredBuildings = List.from(buildings); // Mettre à jour la liste filtrée
               });
-              _loadBuildings(); // Recharger la liste des bâtiments depuis la base de données
+              _saveBuildings();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Bâtiment ajouté avec succès: $buildingName'),
@@ -148,8 +150,8 @@ class _ParamPageState extends State<ParamPage> {
   void _removeBuilding(int index) async {
     setState(() {
       buildings.removeAt(index);
+      filteredBuildings = List.from(buildings); // Mettre à jour la liste filtrée
       _saveBuildings();
-      filteredBuildings = List.from(buildings);
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -160,6 +162,7 @@ class _ParamPageState extends State<ParamPage> {
 }
 
 
+
 class ZonePage extends StatefulWidget {
   final String buildingName;
   final int buildingId;
@@ -168,7 +171,6 @@ class ZonePage extends StatefulWidget {
   @override
   _ZonePageState createState() => _ZonePageState();
 }
-
 class _ZonePageState extends State<ZonePage> {
   late TextEditingController _zoneController;
   late DatabaseHelper databaseHelper;
@@ -315,17 +317,18 @@ class FloorPage extends StatefulWidget {
   @override
   _FloorPageState createState() => _FloorPageState();
 }
+
 class _FloorPageState extends State<FloorPage> {
   late TextEditingController _floorController;
   List<String> floors = [];
   late DatabaseHelper databaseHelper;
-  late int? selectedZoneId;
-
+  int? selectedZoneId;
 
   @override
   void initState() {
     super.initState();
     _floorController = TextEditingController();
+    databaseHelper = DatabaseHelper.instance;
     _loadFloors();
   }
 
@@ -345,6 +348,12 @@ class _FloorPageState extends State<FloorPage> {
   void dispose() {
     _floorController.dispose();
     super.dispose();
+  }
+
+  void _onZoneSelected(int zoneId) {
+    setState(() {
+      selectedZoneId = zoneId;
+    });
   }
 
   @override
@@ -406,15 +415,23 @@ class _FloorPageState extends State<FloorPage> {
         ElevatedButton(
           onPressed: () async {
             String floorName = _floorController.text.trim();
-            if (floorName.isNotEmpty) {
-              // Utiliser DatabaseHelper pour insérer le nouvel étage
+            if (floorName.isNotEmpty && selectedZoneId != null) {
+              // Utiliser DatabaseHelper pour insérer le nouvel étage dans la base de données SQLite
               await databaseHelper.insertFloor(selectedZoneId!, floorName);
+
               setState(() {
                 _floorController.clear();
               });
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Étage ajouté avec succès: $floorName'),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Veuillez sélectionner une zone d\'abord'),
                 ),
               );
             }
@@ -424,6 +441,7 @@ class _FloorPageState extends State<FloorPage> {
       ],
     );
   }
+
   void _removeFloor(int index) {
     setState(() {
       floors.removeAt(index);

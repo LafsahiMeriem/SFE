@@ -152,6 +152,22 @@ class DatabaseHelper {
     print('Floor deleted successfully: $floorName');
   }
 
+  Future<int> getFloorId(int zoneId, String floorName) async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query(
+      floorsTable,
+      columns: ['id'],
+      where: 'zone_id = ? AND name = ?',
+      whereArgs: [zoneId, floorName],
+    );
+    if (result.isNotEmpty) {
+      return result.first['id'] as int;
+    } else {
+      return -1; // ou toute autre valeur qui indique qu'aucun étage n'a été trouvé
+    }
+  }
+
+
 
   // Office CRUD operations
 

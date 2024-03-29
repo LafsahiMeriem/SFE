@@ -116,10 +116,10 @@ class MenuPage extends StatelessWidget {
             );
           }),
           _buildMenuItem(context, 'Encoder', Icons.qr_code, () {
-           Navigator.push(
-                context,
-               MaterialPageRoute(builder: (context) => EncoderPage()),
-             );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EncoderPage()),
+            );
           }),
           _buildMenuItem(context, 'Scan', Icons.qr_code_scanner, () {
             // Start barcode or QR code scan

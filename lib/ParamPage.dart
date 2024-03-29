@@ -153,6 +153,7 @@ class _ParamPageState extends State<ParamPage> {
     if (index >= 0 && index < buildings.length) {
       String buildingName = buildings[index];
 
+      // Supprimer le bâtiment de la base de données
       await DatabaseHelper.instance.deleteBuilding(buildingName);
 
       setState(() {
@@ -169,6 +170,7 @@ class _ParamPageState extends State<ParamPage> {
       print('Index out of bounds.');
     }
   }
+
 }
 
 

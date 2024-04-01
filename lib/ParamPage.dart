@@ -167,21 +167,19 @@ class _ParamPageState extends State<ParamPage> {
         filteredBuildings = List.from(buildings);
       });
 
+      // Enregistrer les modifications dans le stockage local
+      await _saveBuildings();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Bâtiment supprimé avec succès'),
         ),
       );
-
-      // Revenir à la page ParamPage après la suppression
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => ParamPage()),
-      );
     } else {
       print('Index out of bounds.');
     }
   }
+
 }
 
 class ZonePage extends StatefulWidget {

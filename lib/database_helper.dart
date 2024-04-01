@@ -49,7 +49,6 @@ class DatabaseHelper {
     // Create zones table
     await db.execute('''
       CREATE TABLE $zonesTable (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
         building_id INTEGER,
         name TEXT,
         FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
@@ -60,7 +59,6 @@ class DatabaseHelper {
     // Create floors table
     await db.execute('''
       CREATE TABLE $floorsTable (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
         zone_id INTEGER,
         name TEXT,
         FOREIGN KEY (zone_id) REFERENCES $zonesTable(id)
@@ -68,14 +66,20 @@ class DatabaseHelper {
     ''');
 
     // Create offices table
+    // Create offices table
     await db.execute('''
-      CREATE TABLE $officesTable (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        floor_id INTEGER,
-        name TEXT,
-        FOREIGN KEY (floor_id) REFERENCES $floorsTable(id)
-      )
-    ''');
+    CREATE TABLE $officesTable (
+    floor_id INTEGER,
+    zone_id INTEGER, 
+    name TEXT,
+    FOREIGN KEY (floor_id) REFERENCES $floorsTable(id),
+    FOREIGN KEY (zone_id) REFERENCES $zonesTable(id) 
+    )
+''');
+
+
+
+
     print("database on created ==============================");
   }
 
@@ -168,6 +172,10 @@ class DatabaseHelper {
     }
   }
 
+  // Dans la classe DatabaseHelper
+
+
+
 
 
   // Office CRUD operations
@@ -193,6 +201,18 @@ class DatabaseHelper {
     );
     print('Office deleted successfully: $officeName');
   }
+
+  // Dans la classe DatabaseHelper
+
+  Future<void> deleteAllOfficesForFloor(int zoneId, String floorName) async {
+    final db = await instance.database;
+    await db.delete(
+      'offices',
+      where: 'zone_id = ? AND floor_name = ?',
+      whereArgs: [zoneId, floorName],
+    );
+  }
+
 
 
 }

@@ -523,28 +523,33 @@ class _OfficePageState extends State<OfficePage> {
     super.initState();
     _officeController = TextEditingController();
     databaseHelper = DatabaseHelper.instance;
-    _loadOffices();
-  }
-
-  Future<void> _loadOffices() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      offices = prefs.getStringList('${widget.floorName}_offices') ?? [];
-    });
-  }
-
-  Future<void> _saveOffice() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('${widget.floorName}_offices', offices);
-    // Utilisez les valeurs selectedFloorId et selectedZoneId pour insérer le bureau
-    await databaseHelper.insertOffice(widget.selectedFloorId!, _officeController.text.trim(), widget.selectedZoneId!);
+    _loadOffices(); // Appel de la méthode pour charger les bureaux lors de la construction initiale de la page
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadOffices();
+    _loadOffices(); // Appel de la méthode pour charger les bureaux lorsque la dépendance de la page change
   }
+
+  Future<void> _loadOffices() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? loadedOffices = prefs.getStringList('${widget.floorName}_offices');
+    print('Loaded offices: $loadedOffices'); // Vérifier les bureaux chargés depuis les préférences partagées
+    setState(() {
+      offices = loadedOffices ?? [];
+    });
+  }
+  Future<void> _saveOffice() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('${widget.floorName}_offices', offices);
+    print('Saved offices: $offices'); // Vérifier les bureaux enregistrés dans les préférences partagées
+    // Utilisez les valeurs selectedFloorId et selectedZoneId pour insérer le bureau
+    await databaseHelper.insertOffice(widget.selectedFloorId!, _officeController.text.trim(), widget.selectedZoneId!);
+  }
+
+
+
 
 
   @override
@@ -597,11 +602,11 @@ class _OfficePageState extends State<OfficePage> {
             if (officeName.isNotEmpty) {
               // Vérifiez si les valeurs selectedFloorId et selectedZoneId sont valides
               if (widget.selectedFloorId != null && widget.selectedZoneId != null) {
-                await _saveOffice(); // Enregistrer le bureau
                 setState(() {
-                  offices.add(officeName);
+                  offices.add(officeName); // Ajoutez le bureau à la liste avant de l'enregistrer
                   _officeController.clear();
                 });
+                await _saveOffice(); // Enregistrer le bureau après l'avoir ajouté à la liste
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Bureau ajouté avec succès: $officeName'),

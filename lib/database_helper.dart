@@ -41,6 +41,7 @@ class DatabaseHelper {
     // Create buildings table
     await db.execute('''
       CREATE TABLE $buildingsTable (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT
       )
@@ -49,6 +50,8 @@ class DatabaseHelper {
     // Create zones table
     await db.execute('''
       CREATE TABLE $zonesTable (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+
         building_id INTEGER,
         name TEXT,
         FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
@@ -59,16 +62,18 @@ class DatabaseHelper {
     // Create floors table
     await db.execute('''
       CREATE TABLE $floorsTable (
-        zone_id INTEGER,
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+           zone_id INTEGER,
         name TEXT,
         FOREIGN KEY (zone_id) REFERENCES $zonesTable(id)
       )
     ''');
 
     // Create offices table
-    // Create offices table
     await db.execute('''
     CREATE TABLE $officesTable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
     floor_id INTEGER,
     zone_id INTEGER, 
     name TEXT,
@@ -172,7 +177,6 @@ class DatabaseHelper {
     }
   }
 
-  // Dans la classe DatabaseHelper
 
 
 
@@ -202,7 +206,7 @@ class DatabaseHelper {
     print('Office deleted successfully: $officeName');
   }
 
-  // Dans la classe DatabaseHelper
+
 
   Future<void> deleteAllOfficesForFloor(int zoneId, String floorName) async {
     final db = await instance.database;

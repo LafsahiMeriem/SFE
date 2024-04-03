@@ -182,11 +182,14 @@ class _ParamPageState extends State<ParamPage> {
 
 }
 
+
+
 class ZonePage extends StatefulWidget {
   final String buildingName;
   final int buildingId;
 
   const ZonePage(this.buildingName, this.buildingId);
+
   @override
   _ZonePageState createState() => _ZonePageState();
 }
@@ -317,13 +320,12 @@ class _ZonePageState extends State<ZonePage> {
 
   void _removeZone(int index) async {
     if (index >= 0 && index < zones.length) {
+      String zoneName = zones[index];
+      await databaseHelper.deleteZone(widget.buildingId, index);
       setState(() {
-        String zoneName = zones[index];
         zones.removeAt(index);
         _saveZones();
       });
-
-      await databaseHelper.deleteZone(widget.buildingId, index);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -335,6 +337,7 @@ class _ZonePageState extends State<ZonePage> {
     }
   }
 }
+
 
 class FloorPage extends StatefulWidget {
   final String zoneName;
@@ -350,8 +353,8 @@ class _FloorPageState extends State<FloorPage> {
   late TextEditingController _floorController;
   List<String> floors = [];
   late DatabaseHelper databaseHelper;
-  int? selectedFloorId; // Ajout de la variable pour stocker l'ID de l'étage sélectionné
-  int? selectedZoneId; // Ajout de la variable pour stocker l'ID de la zone sélectionnée
+  int? selectedFloorId;
+  int? selectedZoneId;
 
   @override
   void initState() {
@@ -416,8 +419,7 @@ class _FloorPageState extends State<FloorPage> {
                     ),
                     onTap: () async {
                       setState(() {
-                        // Mettre à jour les valeurs des variables sélectionnées
-                        selectedFloorId = index;
+                        selectedFloorId = index + 1;
                         selectedZoneId = widget.zoneId;
                       });
                       Navigator.push(
@@ -426,8 +428,8 @@ class _FloorPageState extends State<FloorPage> {
                           builder: (context) => OfficePage(
                             floors[index],
                             widget.zoneId,
-                            selectedFloorId: selectedFloorId, // Passer l'ID de l'étage sélectionné
-                            selectedZoneId: selectedZoneId, // Passer l'ID de la zone sélectionnée
+                            selectedFloorId: selectedFloorId,
+                            selectedZoneId: selectedZoneId,
                           ),
                         ),
                       );
@@ -539,11 +541,19 @@ class _OfficePageState extends State<OfficePage> {
     });
   }
   Future<void> _saveOffice() async {
+    final officeName = _officeController.text.trim();
+    print('Office name to save: $officeName');
+    print('Selected floor ID: ${widget.selectedFloorId}');
+    print('Selected zone ID: ${widget.selectedZoneId}');
+
     final prefs = await SharedPreferences.getInstance();
     prefs.setStringList('${widget.floorName}_offices', offices);
     print('Saved offices: $offices'); // Vérifier les bureaux enregistrés dans les préférences partagées
+
     // Utilisez les valeurs selectedFloorId et selectedZoneId pour insérer le bureau
-    await databaseHelper.insertOffice(widget.selectedFloorId!, _officeController.text.trim(), widget.selectedZoneId!);
+    print('Inserting office: $officeName'); // Ajoutez cette ligne pour vérifier le nom du bureau
+    await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.selectedZoneId!);
+    print('Office inserted successfully: $officeName'); // Ajoutez cette ligne pour vérifier le nom du bureau
   }
 
 

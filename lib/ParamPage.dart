@@ -457,18 +457,28 @@ class _FloorPageState extends State<FloorPage> {
         ),
         ElevatedButton(
           onPressed: () async {
+            print('Bouton d\'ajout d\'étage appuyé'); // Vérifier si le bouton est appuyé
             String floorName = _floorController.text.trim();
             if (floorName.isNotEmpty) {
-              await databaseHelper.insertFloor(widget.zoneId, floorName);
-              setState(() {
-                floors.add(floorName);
-                _floorController.clear();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Étage ajouté avec succès: $floorName'),
-                ),
-              );
+              if (widget.zoneId != null) {
+                int nextFloorId = floors.length + 1; // Assigner l'ID du prochain étage disponible
+                await databaseHelper.insertFloor(widget.zoneId, floorName, nextFloorId);
+                setState(() {
+                  floors.add(floorName);
+                  _floorController.clear();
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Étage ajouté avec succès: $floorName'),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erreur lors de la sélection de la zone.'),
+                  ),
+                );
+              }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -523,19 +533,19 @@ class _OfficePageState extends State<OfficePage> {
     super.initState();
     _officeController = TextEditingController();
     databaseHelper = DatabaseHelper.instance;
-    _loadOffices(); // Appel de la méthode pour charger les bureaux lors de la construction initiale de la page
+    _loadOffices();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadOffices(); // Appel de la méthode pour charger les bureaux lorsque la dépendance de la page change
+    _loadOffices();
   }
 
   Future<void> _loadOffices() async {
     final prefs = await SharedPreferences.getInstance();
     List<String>? loadedOffices = prefs.getStringList('${widget.floorName}_offices');
-    print('Loaded offices: $loadedOffices'); // Vérifier les bureaux chargés depuis les préférences partagées
+    print('Loaded offices: $loadedOffices');
     setState(() {
       offices = loadedOffices ?? [];
     });
@@ -548,12 +558,10 @@ class _OfficePageState extends State<OfficePage> {
 
     final prefs = await SharedPreferences.getInstance();
     prefs.setStringList('${widget.floorName}_offices', offices);
-    print('Saved offices: $offices'); // Vérifier les bureaux enregistrés dans les préférences partagées
-
-    // Utilisez les valeurs selectedFloorId et selectedZoneId pour insérer le bureau
-    print('Inserting office: $officeName'); // Ajoutez cette ligne pour vérifier le nom du bureau
+    print('Saved offices: $offices');
+    print('Inserting office: $officeName');
     await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.selectedZoneId!);
-    print('Office inserted successfully: $officeName'); // Ajoutez cette ligne pour vérifier le nom du bureau
+    print('Office inserted successfully: $officeName');
   }
 
 

@@ -64,8 +64,9 @@ class DatabaseHelper {
       CREATE TABLE $floorsTable (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
            zone_id INTEGER,
-        name TEXT,
-        FOREIGN KEY (zone_id) REFERENCES $zonesTable(id)
+           floor_id INTEGER,
+           name TEXT,
+           FOREIGN KEY (zone_id) REFERENCES $zonesTable(id)
       )
     ''');
 
@@ -140,12 +141,12 @@ class DatabaseHelper {
 
   // Floor CRUD operations
 
-  Future<void> insertFloor(int zoneId, String name) async {
+  Future<void> insertFloor(int zoneId, String floorName, int floorId) async {
     final db = await instance.database;
-    await db.insert(floorsTable, {'zone_id': zoneId, 'name': name});
-    print('Floor inserted successfully: $name');
-
+    await db.insert(floorsTable, {'zone_id': zoneId, 'name': floorName, 'floor_id': floorId});
+    print('Floor inserted successfully: $floorName');
   }
+
 
   Future<List<Map<String, dynamic>>> getFloorsForZone(int zoneId) async {
     final db = await instance.database;

@@ -182,7 +182,7 @@ class _AjouterState extends State<Ajouter> {
   int? _selectedBuildingId;
   int? _selectedZoneId;
   int? _selectedFloorId;
-  int? _selectedOfficeId;
+ // int? _selectedOfficeId;
 
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
@@ -256,22 +256,23 @@ class _AjouterState extends State<Ajouter> {
     );
   }
 
-  void _ajouter() async {
+  void _ajouterProduit() async {
     final String product = _productController.text;
     final String barcode = _barcodeController.text;
+    final int? selectedBuildingId = _selectedBuildingId;
+    final int? selectedZoneId = _selectedZoneId;
+    final int? selectedFloorId = _selectedFloorId;
+  //  final int? selectedOfficeId = _selectedOfficeId;
 
-    final int? selectedBuildingId = _selectedBuildingId as int?;
-    final int? selectedZoneId = _selectedZoneId as int?;
-    final int? selectedFloorId = _selectedFloorId as int?;
-    final int? selectedOfficeId = _selectedOfficeId as int?;
+    if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
+        selectedZoneId != null && selectedFloorId != null ) {
+      // Insérer les données du produit dans la base de données
+      await DatabaseHelper.instance.insertProduct(
+          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId);
 
-    if (selectedBuildingId != null &&
-        selectedZoneId != null &&
-        selectedFloorId != null &&
-        selectedOfficeId != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Données insérées dans la base de données.'),
+          content: Text('Produit ajouté avec succès.'),
         ),
       );
 
@@ -281,12 +282,12 @@ class _AjouterState extends State<Ajouter> {
         _selectedBuildingId = null;
         _selectedZoneId = null;
         _selectedFloorId = null;
-        _selectedOfficeId = null;
+       // _selectedOfficeId = null;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez sélectionner une valeur pour chaque champ.'),
+          content: Text('Veuillez remplir tous les champs.'),
         ),
       );
     }
@@ -321,13 +322,13 @@ class _AjouterState extends State<Ajouter> {
                   _selectedFloorId = (value as int);
                 });
               }),
-              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
-                setState(() {
-                  _selectedOfficeId = (value as int);
-                });
-              }),
+              // _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
+              //   setState(() {
+              //     _selectedOfficeId = (value as int);
+              //   });
+              // }),
               const SizedBox(height: 32),
-              _buildButton(context, 'Ajouter', _ajouter),
+              _buildButton(context, 'Ajouter', _ajouterProduit),
             ],
           ),
         ),

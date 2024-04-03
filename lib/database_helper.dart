@@ -14,6 +14,7 @@ class DatabaseHelper {
   static const String zonesTable = 'zones';
   static const String floorsTable = 'floors';
   static const String officesTable = 'offices';
+  static const String ProductsTable ="produit";
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -42,7 +43,6 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE $buildingsTable (
 
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT
       )
     ''');
@@ -50,7 +50,6 @@ class DatabaseHelper {
     // Create zones table
     await db.execute('''
       CREATE TABLE $zonesTable (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
 
         building_id INTEGER,
         name TEXT,
@@ -62,7 +61,6 @@ class DatabaseHelper {
     // Create floors table
     await db.execute('''
       CREATE TABLE $floorsTable (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
            zone_id INTEGER,
            floor_id INTEGER,
            name TEXT,
@@ -73,7 +71,6 @@ class DatabaseHelper {
     // Create offices table
     await db.execute('''
     CREATE TABLE $officesTable (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
     floor_id INTEGER,
     zone_id INTEGER, 
@@ -83,11 +80,41 @@ class DatabaseHelper {
     )
 ''');
 
+    // Create products table
+    await db.execute('''
+CREATE TABLE $ProductsTable (
+  name TEXT,
+  barcode TEXT,
+  floor_id INTEGER,
+  zone_id INTEGER,
+  building_id INTEGER,
+  FOREIGN KEY (office_id) REFERENCES $officesTable(id),
+  FOREIGN KEY (floor_id) REFERENCES $floorsTable(id),
+  FOREIGN KEY (zone_id) REFERENCES $zonesTable(id),
+  FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
+)
+''');
+
+
 
 
 
     print("database on created ==============================");
   }
+  //Product CRUD operations
+
+  Future<void> insertProduct(String name, String barcode, int buildingId, int zoneId, int floorId) async {
+    final db = await instance.database;
+    await db.insert( ProductsTable , {
+      'name': name,
+      'barcode': barcode,
+      'building_id': buildingId,
+      'zone_id': zoneId,
+      'floor_id': floorId,
+    });
+    print('Produit inséré avec succès : $name');
+  }
+
 
   // Building CRUD operations
   Future<void> deleteDatabaseFile() async {
@@ -100,7 +127,9 @@ class DatabaseHelper {
 
   Future<void> insertBuilding(String name) async {
     final db = await instance.database;
-    await db.insert(buildingsTable, {'name': name});
+    await db.insert(buildingsTable, {
+      'name': name
+    });
     print('Building inserted successfully: $name');
 
   }

@@ -6,9 +6,9 @@ void main() {
   runApp(MaterialApp(
     home: ParamPage(),
     theme: ThemeData(
-      primaryColor: Colors.deepPurple, // Couleur principale de l'application
-      hintColor: Colors.deepPurpleAccent, // Couleur d'accentuation
-      fontFamily: 'Roboto', // Police par défaut
+      primaryColor: Colors.deepPurple,
+      hintColor: Colors.deepPurpleAccent,
+      fontFamily: 'Roboto',
     ),
   ));
 }
@@ -220,7 +220,6 @@ class ZonePage extends StatefulWidget {
   @override
   _ZonePageState createState() => _ZonePageState();
 }
-
 class _ZonePageState extends State<ZonePage> {
   late TextEditingController _zoneController;
   late DatabaseHelper databaseHelper;
@@ -381,7 +380,6 @@ class FloorPage extends StatefulWidget {
   @override
   _FloorPageState createState() => _FloorPageState();
 }
-
 class _FloorPageState extends State<FloorPage> {
   late TextEditingController _floorController;
   List<String> floors = [];
@@ -546,7 +544,6 @@ class OfficePage extends StatefulWidget {
   @override
   _OfficePageState createState() => _OfficePageState();
 }
-
 class _OfficePageState extends State<OfficePage> {
   late TextEditingController _officeController;
   List<String> offices = [];
@@ -602,7 +599,7 @@ class _OfficePageState extends State<OfficePage> {
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
-                      title: Text(offices[index]),
+                      title: Text(offices[index], style: TextStyle(fontWeight: FontWeight.bold)),
                       trailing: IconButton(
                         icon: Icon(Icons.delete),
                         onPressed: () {

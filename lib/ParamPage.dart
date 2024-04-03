@@ -62,6 +62,7 @@ class _ParamPageState extends State<ParamPage> {
 
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -579,6 +580,7 @@ class _OfficePageState extends State<OfficePage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -645,7 +647,7 @@ class _OfficePageState extends State<OfficePage> {
                     _officeController.clear();
                     _isAddingOffice = false;
                   });
-                  await _saveOffice();
+                  await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.zoneId); // Utilisation de selectedFloorId
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Bureau ajouté avec succès: $officeName'),
@@ -653,6 +655,8 @@ class _OfficePageState extends State<OfficePage> {
                   );
                 }
               },
+
+
               child: Text('Ajouter un bureau'),
             ),
           ],

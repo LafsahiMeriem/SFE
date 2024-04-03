@@ -189,6 +189,8 @@ class DatabaseHelper {
     final db = await instance.database;
     await db.insert(officesTable, {'floor_id': floorId, 'zone_id': zoneId, 'name': name});
     print('Office inserted successfully: $name');
+
+
   }
 
 

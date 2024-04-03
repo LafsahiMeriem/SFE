@@ -647,7 +647,7 @@ class _OfficePageState extends State<OfficePage> {
                     _officeController.clear();
                     _isAddingOffice = false;
                   });
-                  await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.zoneId); // Utilisation de selectedFloorId
+                  await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.zoneId);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Bureau ajouté avec succès: $officeName'),

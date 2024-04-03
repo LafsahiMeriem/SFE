@@ -260,10 +260,10 @@ class _AjouterState extends State<Ajouter> {
     final String product = _productController.text;
     final String barcode = _barcodeController.text;
 
-    final String? selectedBuildingId = _selectedBuildingId as String?;
-    final String? selectedZoneId = _selectedZoneId as String?;
-    final String? selectedFloorId = _selectedFloorId as String?;
-    final String? selectedOfficeId = _selectedOfficeId as String?;
+    final int? selectedBuildingId = _selectedBuildingId as int?;
+    final int? selectedZoneId = _selectedZoneId as int?;
+    final int? selectedFloorId = _selectedFloorId as int?;
+    final int? selectedOfficeId = _selectedOfficeId as int?;
 
     if (selectedBuildingId != null &&
         selectedZoneId != null &&
@@ -308,22 +308,22 @@ class _AjouterState extends State<Ajouter> {
               _buildTextField('Code barre', _barcodeController),
               _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId as String?, (value) {
                 setState(() {
-                  _selectedBuildingId = int.parse(value as String);
+                  _selectedBuildingId = (value as int);
                 });
               }),
               _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId as String?, (value) {
                 setState(() {
-                  _selectedZoneId = int.parse(value as String);
+                  _selectedZoneId = (value as int);
                 });
               }),
               _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId as String?, (value) {
                 setState(() {
-                  _selectedFloorId = int.parse(value as String);
+                  _selectedFloorId = (value as int);
                 });
               }),
               _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
                 setState(() {
-                  _selectedOfficeId = int.parse(value as String);
+                  _selectedOfficeId = (value as int);
                 });
               }),
               const SizedBox(height: 32),

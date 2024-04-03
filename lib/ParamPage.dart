@@ -300,6 +300,7 @@ class _ZonePageState extends State<ZonePage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Zone ajoutée avec succès: $zoneName'),
+
                 ),
               );
             }
@@ -444,6 +445,9 @@ class _FloorPageState extends State<FloorPage> {
       ),
     );
   }
+
+
+
 
   Widget _buildAddFloorButton() {
     return Column(

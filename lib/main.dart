@@ -98,12 +98,11 @@ class MenuPage extends StatelessWidget {
       ),
       body: GridView.count(
         crossAxisCount: 2,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(15),
         crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        mainAxisSpacing: 17,
         children: [
           _buildMenuItem(context, 'Ajouter', Icons.add, () {
-            // Navigate to the Ajouter page
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const Ajouter()),
@@ -144,7 +143,7 @@ class MenuPage extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(25),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -155,7 +154,7 @@ class MenuPage extends StatelessWidget {
               size: 48,
             ),
             const SizedBox(
-              height: 8,
+              height: 10,
             ),
             Text(
               title,
@@ -185,114 +184,91 @@ class _AjouterState extends State<Ajouter> {
   int? _selectedFloorId;
   int? _selectedOfficeId;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ajouter'),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTextField('Produit', _productController),
-              const SizedBox(height: 16),
-              _buildTextField('Code barre', _barcodeController),
-              const SizedBox(height: 16),
-              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId as String?, (value) {
-                setState(() {
-                  _selectedBuildingId = int.parse(value as String);
-                });
-              }),
-              const SizedBox(height: 16),
-              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId as String?, (value) {
-                setState(() {
-                  _selectedZoneId = int.parse(value as String);
-                });
-              }),
-              const SizedBox(height: 16),
-              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId as String?, (value) {
-                setState(() {
-                  _selectedFloorId = int.parse(value as String);
-                });
-              }),
-              const SizedBox(height: 16),
-              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
-                setState(() {
-                  _selectedOfficeId = int.parse(value as String);
-                });
-              }),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _ajouter,
-                child: const Text('Ajouter'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
   Widget _buildTextField(String labelText, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
-        border: OutlineInputBorder(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        ),
       ),
     );
   }
 
   Widget _buildDropdownField(String labelText, Future<List<Map<String, dynamic>>> items, String? selectedValue, void Function(String?) onChanged) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: items,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          List<Map<String, dynamic>> data = snapshot.data ?? [];
-          List<String> names = data.map((e) => e['name'].toString()).toList();
-          return DropdownButtonFormField<String>(
-            value: selectedValue,
-            onChanged: onChanged,
-            items: names.map((String name) {
-              return DropdownMenuItem<String>(
-                value: name,
-                child: Text(name),
-              );
-            }).toList(),
-            decoration: InputDecoration(
-              labelText: labelText,
-              border: OutlineInputBorder(),
-            ),
-          );
-        }
-      },
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: items,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            List<Map<String, dynamic>> data = snapshot.data ?? [];
+            List<String> names = data.map((e) => e['name'].toString()).toList();
+            return DropdownButtonFormField<String>(
+              value: selectedValue,
+              onChanged: onChanged,
+              items: names.map((String name) {
+                return DropdownMenuItem<String>(
+                  value: name,
+                  child: Text(name),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                labelText: labelText,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
+  Widget _buildButton(BuildContext context, String label, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepPurple,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+      ),
+    );
+  }
 
   void _ajouter() async {
     final String product = _productController.text;
     final String barcode = _barcodeController.text;
 
-    // Utiliser les valeurs sélectionnées pour les identifiants de bâtiment, de zone, d'étage et de bureau
     final String? selectedBuildingId = _selectedBuildingId as String?;
     final String? selectedZoneId = _selectedZoneId as String?;
     final String? selectedFloorId = _selectedFloorId as String?;
     final String? selectedOfficeId = _selectedOfficeId as String?;
 
-    // Vérifier si toutes les valeurs nécessaires sont sélectionnées
     if (selectedBuildingId != null &&
         selectedZoneId != null &&
         selectedFloorId != null &&
         selectedOfficeId != null) {
-      // Votre logique de stockage dans la base de données ici
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Données insérées dans la base de données.'),
@@ -308,7 +284,6 @@ class _AjouterState extends State<Ajouter> {
         _selectedOfficeId = null;
       });
     } else {
-      // Si une des valeurs nécessaires n'est pas sélectionnée, affichez un message d'erreur
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner une valeur pour chaque champ.'),
@@ -317,8 +292,49 @@ class _AjouterState extends State<Ajouter> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ajouter'),
+      ),
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTextField('Produit', _productController),
+              _buildTextField('Code barre', _barcodeController),
+              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId as String?, (value) {
+                setState(() {
+                  _selectedBuildingId = int.parse(value as String);
+                });
+              }),
+              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId as String?, (value) {
+                setState(() {
+                  _selectedZoneId = int.parse(value as String);
+                });
+              }),
+              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId as String?, (value) {
+                setState(() {
+                  _selectedFloorId = int.parse(value as String);
+                });
+              }),
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
+                setState(() {
+                  _selectedOfficeId = int.parse(value as String);
+                });
+              }),
+              const SizedBox(height: 32),
+              _buildButton(context, 'Ajouter', _ajouter),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
-
 
 void startScan(BuildContext context) {
   const MethodChannel methodChannel =

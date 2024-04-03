@@ -2,13 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
 
+void main() {
+  runApp(MaterialApp(
+    home: ParamPage(),
+    theme: ThemeData(
+      primaryColor: Colors.deepPurple, // Couleur principale de l'application
+      hintColor: Colors.deepPurpleAccent, // Couleur d'accentuation
+      fontFamily: 'Roboto', // Police par défaut
+    ),
+  ));
+}
+
 class ParamPage extends StatefulWidget {
   const ParamPage({Key? key}) : super(key: key);
 
   @override
   _ParamPageState createState() => _ParamPageState();
 }
-
 class _ParamPageState extends State<ParamPage> {
   late TextEditingController _buildingController;
   late TextEditingController _searchController;
@@ -50,6 +60,7 @@ class _ParamPageState extends State<ParamPage> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,40 +72,46 @@ class _ParamPageState extends State<ParamPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Rechercher un bâtiment',
-              ),
-              onChanged: _filterBuildings,
-            ),
-            _buildAddBuildingButton(),
+            SizedBox(height: 16),
+            _buildAddBuildingButton(), // Placer la carte d'ajout en haut de la colonne
+            SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: filteredBuildings.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(filteredBuildings[index]),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            _removeBuilding(index);
-                          },
-                        ),
-                      ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filteredBuildings.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(
+                              filteredBuildings[index],
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                _removeBuilding(index);
+                              },
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ZonePage(filteredBuildings[index], index),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ZonePage(filteredBuildings[index], index)),
-                      );
-                    },
-                  );
-                },
+                  ],
+                ),
               ),
             ),
           ],
@@ -111,37 +128,49 @@ class _ParamPageState extends State<ParamPage> {
 
   Widget _buildAddBuildingButton() {
     return _isAddingBuilding
-        ? Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _buildingController,
-          decoration: InputDecoration(
-            hintText: 'Nom du bâtiment',
-          ),
+        ? Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          shrinkWrap: true, // Pour s'adapter à la taille du contenu
+          padding: EdgeInsets.only(bottom: 10), // Ajoute un padding supplémentaire en bas
+          children: [
+            TextField(
+              controller: _buildingController,
+              decoration: InputDecoration(
+                hintText: 'Nom du bâtiment',
+                border: InputBorder.none,
+              ),
+            ),
+            SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: () async {
+                String buildingName = _buildingController.text.trim();
+                if (buildingName.isNotEmpty) {
+                  await DatabaseHelper.instance.insertBuilding(buildingName);
+                  setState(() {
+                    _buildingController.clear();
+                    _isAddingBuilding = false;
+                    buildings.add(buildingName);
+                    filteredBuildings = List.from(buildings);
+                  });
+                  _saveBuildings();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Bâtiment ajouté avec succès: $buildingName'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Ajouter'),
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () async {
-            String buildingName = _buildingController.text.trim();
-            if (buildingName.isNotEmpty) {
-              await DatabaseHelper.instance.insertBuilding(buildingName);
-              setState(() {
-                _buildingController.clear();
-                _isAddingBuilding = false;
-                buildings.add(buildingName);
-                filteredBuildings = List.from(buildings);
-              });
-              _saveBuildings();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Bâtiment ajouté avec succès: $buildingName'),
-                ),
-              );
-            }
-          },
-          child: Text('Ajouter'),
-        ),
-      ],
+      ),
     )
         : ElevatedButton(
       onPressed: () {
@@ -179,9 +208,7 @@ class _ParamPageState extends State<ParamPage> {
       print('Index out of bounds.');
     }
   }
-
 }
-
 
 
 class ZonePage extends StatefulWidget {
@@ -217,11 +244,6 @@ class _ZonePageState extends State<ZonePage> {
     });
   }
 
-  Future<void> _saveZones() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('${widget.buildingName}_zones', zones);
-  }
-
   @override
   void dispose() {
     _zoneController.dispose();
@@ -232,44 +254,46 @@ class _ZonePageState extends State<ZonePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Les zones de ${widget.buildingName}'),
+        title: Text('Zones de ${widget.buildingName}'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildAddZoneButton(),
+            SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
                 itemCount: zones.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(zones[index]),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            _removeZone(index);
-                          },
-                        ),
-                      ],
+                  return Card(
+                    elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        zones[index],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _removeZone(index);
+                        },
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FloorPage(zones[index], zoneId: index),
+                          ),
+                        );
+                      },
                     ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FloorPage(zones[index], zoneId: index),
-                        ),
-                      );
-                    },
                   );
                 },
               ),
             ),
-            _buildAddZoneButton(),
           ],
         ),
       ),
@@ -278,36 +302,45 @@ class _ZonePageState extends State<ZonePage> {
 
   Widget _buildAddZoneButton() {
     return _isAddingZone
-        ? Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _zoneController,
-          decoration: InputDecoration(
-            hintText: 'Nom de la zone',
-          ),
+        ? Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _zoneController,
+              decoration: InputDecoration(
+                hintText: 'Nom de la zone',
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                String zoneName = _zoneController.text.trim();
+                if (zoneName.isNotEmpty) {
+                  await databaseHelper.insertZone(widget.buildingId, zoneName);
+                  setState(() {
+                    _isAddingZone = false;
+                    zones.add(zoneName);
+                  });
+                  _zoneController.clear();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Zone ajoutée avec succès: $zoneName'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Ajouter'),
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () async {
-            String zoneName = _zoneController.text.trim();
-            if (zoneName.isNotEmpty) {
-              await databaseHelper.insertZone(widget.buildingId, zoneName);
-              setState(() {
-                _isAddingZone = false;
-                zones.add(zoneName);
-                _saveZones();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Zone ajoutée avec succès: $zoneName'),
-
-                ),
-              );
-            }
-          },
-          child: Text('Ajouter'),
-        ),
-      ],
+      ),
     )
         : ElevatedButton(
       onPressed: () {
@@ -325,9 +358,7 @@ class _ZonePageState extends State<ZonePage> {
       await databaseHelper.deleteZone(widget.buildingId, index);
       setState(() {
         zones.removeAt(index);
-        _saveZones();
       });
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Zone supprimée avec succès'),
@@ -338,6 +369,7 @@ class _ZonePageState extends State<ZonePage> {
     }
   }
 }
+
 
 
 class FloorPage extends StatefulWidget {
@@ -354,8 +386,7 @@ class _FloorPageState extends State<FloorPage> {
   late TextEditingController _floorController;
   List<String> floors = [];
   late DatabaseHelper databaseHelper;
-  int? selectedFloorId;
-  int? selectedZoneId;
+  bool _isAddingFloor = false;
 
   @override
   void initState() {
@@ -378,11 +409,6 @@ class _FloorPageState extends State<FloorPage> {
     });
   }
 
-  Future<void> _saveFloors() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('${widget.zoneName}_floors', floors);
-  }
-
   @override
   void dispose() {
     _floorController.dispose();
@@ -393,116 +419,110 @@ class _FloorPageState extends State<FloorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Les étages de ${widget.zoneName}'),
+        title: Text('Étages de la zone ${widget.zoneName}'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildAddFloorButton(),
+            SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
                 itemCount: floors.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(floors[index]),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            _removeFloor(index);
-                          },
-                        ),
-                      ],
-                    ),
-                    onTap: () async {
-                      setState(() {
-                        selectedFloorId = index + 1;
-                        selectedZoneId = widget.zoneId;
-                      });
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OfficePage(
-                            floors[index],
-                            widget.zoneId,
-                            selectedFloorId: selectedFloorId,
-                            selectedZoneId: selectedZoneId,
+                  return Card(
+                    elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(floors[index], style: TextStyle(fontWeight: FontWeight.bold)),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _removeFloor(index);
+                        },
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OfficePage(
+                              floors[index],
+                              widget.zoneId,
+                              selectedFloorId: index + 1,
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),
             ),
-            _buildAddFloorButton(),
           ],
         ),
       ),
     );
   }
 
-
-
-
   Widget _buildAddFloorButton() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _floorController,
-          decoration: InputDecoration(
-            hintText: 'Numéro de l\'étage',
-          ),
+    return _isAddingFloor
+        ? Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _floorController,
+              decoration: InputDecoration(
+                hintText: 'Nom de l\'étage',
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                String floorName = _floorController.text.trim();
+                if (floorName.isNotEmpty) {
+                  await databaseHelper.insertFloor(widget.zoneId, floorName, floors.length + 1);
+                  setState(() {
+                    floors.add(floorName);
+                    _floorController.clear();
+                    _isAddingFloor = false;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Étage ajouté avec succès: $floorName'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Ajouter'),
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () async {
-            print('Bouton d\'ajout d\'étage appuyé'); // Vérifier si le bouton est appuyé
-            String floorName = _floorController.text.trim();
-            if (floorName.isNotEmpty) {
-              if (widget.zoneId != null) {
-                int nextFloorId = floors.length + 1; // Assigner l'ID du prochain étage disponible
-                await databaseHelper.insertFloor(widget.zoneId, floorName, nextFloorId);
-                setState(() {
-                  floors.add(floorName);
-                  _floorController.clear();
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Étage ajouté avec succès: $floorName'),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erreur lors de la sélection de la zone.'),
-                  ),
-                );
-              }
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Veuillez saisir un numéro d\'étage valide'),
-                ),
-              );
-            }
-          },
-          child: Text('Ajouter un étage'),
-        ),
-      ],
+      ),
+    )
+        : ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _isAddingFloor = true;
+        });
+      },
+      child: Text('Ajouter un étage'),
     );
   }
 
-  void _removeFloor(int index) {
+  void _removeFloor(int index) async {
     if (index >= 0 && index < floors.length) {
-      setState(() {
-        String removedFloorName = floors.removeAt(index);
-        databaseHelper.deleteFloor(widget.zoneId, removedFloorName);
-      });
+      String removedFloorName = floors.removeAt(index);
+      await databaseHelper.deleteFloor(widget.zoneId, removedFloorName);
+      setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Étage supprimé avec succès'),
@@ -515,13 +535,13 @@ class _FloorPageState extends State<FloorPage> {
 }
 
 
+
 class OfficePage extends StatefulWidget {
   final String floorName;
   final int zoneId;
   final int? selectedFloorId;
-  final int? selectedZoneId;
 
-  const OfficePage(this.floorName, this.zoneId, {this.selectedFloorId, this.selectedZoneId});
+  const OfficePage(this.floorName, this.zoneId, {this.selectedFloorId});
 
   @override
   _OfficePageState createState() => _OfficePageState();
@@ -531,6 +551,7 @@ class _OfficePageState extends State<OfficePage> {
   late TextEditingController _officeController;
   List<String> offices = [];
   late DatabaseHelper databaseHelper;
+  bool _isAddingOffice = false;
 
   @override
   void initState() {
@@ -549,28 +570,16 @@ class _OfficePageState extends State<OfficePage> {
   Future<void> _loadOffices() async {
     final prefs = await SharedPreferences.getInstance();
     List<String>? loadedOffices = prefs.getStringList('${widget.floorName}_offices');
-    print('Loaded offices: $loadedOffices');
     setState(() {
       offices = loadedOffices ?? [];
     });
   }
-  Future<void> _saveOffice() async {
-    final officeName = _officeController.text.trim();
-    print('Office name to save: $officeName');
-    print('Selected floor ID: ${widget.selectedFloorId}');
-    print('Selected zone ID: ${widget.selectedZoneId}');
 
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('${widget.floorName}_offices', offices);
-    print('Saved offices: $offices');
-    print('Inserting office: $officeName');
-    await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.selectedZoneId!);
-    print('Office inserted successfully: $officeName');
+  @override
+  void dispose() {
+    _officeController.dispose();
+    super.dispose();
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -583,23 +592,28 @@ class _OfficePageState extends State<OfficePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildAddOfficeButton(),
+            SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
                 itemCount: offices.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(offices[index]),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _removeOffice(index);
-                      },
+                  return Card(
+                    elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(offices[index]),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _removeOffice(index);
+                        },
+                      ),
                     ),
                   );
                 },
               ),
             ),
-            _buildAddOfficeButton(),
           ],
         ),
       ),
@@ -607,50 +621,60 @@ class _OfficePageState extends State<OfficePage> {
   }
 
   Widget _buildAddOfficeButton() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _officeController,
-          decoration: InputDecoration(
-            hintText: 'Nom ou numéro du bureau',
-          ),
+    return _isAddingOffice
+        ? Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _officeController,
+              decoration: InputDecoration(
+                hintText: 'Nom ou numéro du bureau',
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                String officeName = _officeController.text.trim();
+                if (officeName.isNotEmpty) {
+                  setState(() {
+                    offices.add(officeName);
+                    _officeController.clear();
+                    _isAddingOffice = false;
+                  });
+                  await _saveOffice();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Bureau ajouté avec succès: $officeName'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Ajouter un bureau'),
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () async {
-            String officeName = _officeController.text.trim();
-            if (officeName.isNotEmpty) {
-              // Vérifiez si les valeurs selectedFloorId et selectedZoneId sont valides
-              if (widget.selectedFloorId != null && widget.selectedZoneId != null) {
-                setState(() {
-                  offices.add(officeName); // Ajoutez le bureau à la liste avant de l'enregistrer
-                  _officeController.clear();
-                });
-                await _saveOffice(); // Enregistrer le bureau après l'avoir ajouté à la liste
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Bureau ajouté avec succès: $officeName'),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Veuillez sélectionner un étage et une zone valides'),
-                  ),
-                );
-              }
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Veuillez saisir un nom de bureau valide'),
-                ),
-              );
-            }
-          },
-          child: Text('Ajouter un bureau'),
-        ),
-      ],
+      ),
+    )
+        : ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _isAddingOffice = true;
+        });
+      },
+      child: Text('Ajouter un bureau'),
     );
+  }
+
+  Future<void> _saveOffice() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('${widget.floorName}_offices', offices);
   }
 
   void _removeOffice(int index) async {
@@ -670,8 +694,5 @@ class _OfficePageState extends State<OfficePage> {
 }
 
 
-void main() {
-  runApp(MaterialApp(
-    home: ParamPage(),
-  ));
-}
+
+

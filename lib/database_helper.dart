@@ -103,19 +103,19 @@ CREATE TABLE $ProductsTable (
 
 
 
-
     print("database on created ==============================");
   }
   //Product CRUD operations
 
-  Future<void> insertProduct(String name, String barcode, String buildingId, String zoneId, String floorId) async {
+  Future<void> insertProduct(String name, String barcode, String buildingId, String zoneId, String floorId, String officeId) async {
     final db = await instance.database;
     await db.insert(ProductsTable, {
       'name': name,
       'barcode': barcode,
-      'building': buildingId,
-      'zone': zoneId,
-      'floor': floorId,
+      'building_id': buildingId,
+      'zone_id': zoneId,
+      'floor_id': floorId,
+      'office_id': officeId,
     });
     print('Produit inséré avec succès : $name');
   }

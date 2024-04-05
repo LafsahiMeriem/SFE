@@ -182,6 +182,8 @@ class _AjouterState extends State<Ajouter> {
   String? _selectedBuildingId;
   String? _selectedZoneId;
   String? _selectedFloorId;
+  String? _selectedOfficeId;
+
 
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
@@ -261,13 +263,14 @@ class _AjouterState extends State<Ajouter> {
     final String? selectedBuildingId = _selectedBuildingId;
     final String? selectedZoneId = _selectedZoneId;
     final String? selectedFloorId = _selectedFloorId;
+    final String? selectedOfficeId = _selectedOfficeId;
 
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
-        selectedZoneId != null && selectedFloorId != null) {
+        selectedZoneId != null && selectedFloorId != null && selectedOfficeId != null) {
 
       // Insérer les données du produit dans la base de données
       await DatabaseHelper.instance.insertProduct(
-          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId);
+          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId, selectedOfficeId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -281,6 +284,7 @@ class _AjouterState extends State<Ajouter> {
         _selectedBuildingId = null;
         _selectedZoneId = null;
         _selectedFloorId = null;
+        _selectedOfficeId = null;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -327,6 +331,15 @@ class _AjouterState extends State<Ajouter> {
                   }
                 });
               }),
+
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
+                setState(() {
+                  if (value != null) {
+                    _selectedOfficeId = value;
+                  }
+                });
+              }),
+
 
               const SizedBox(height: 32),
               _buildButton(context, 'Ajouter', _ajouterProduit),

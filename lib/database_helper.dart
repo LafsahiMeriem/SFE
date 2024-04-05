@@ -108,15 +108,14 @@ CREATE TABLE $ProductsTable (
   }
   //Product CRUD operations
 
-  Future<void> insertProduct(String name, String barcode, String buildingId, String zoneId, String floorId, String officeId) async {
+  Future<void> insertProduct(String name, String barcode, String buildingId, String zoneId, String floorId) async {
     final db = await instance.database;
-    await db.insert( ProductsTable , {
+    await db.insert(ProductsTable, {
       'name': name,
       'barcode': barcode,
-      'building_id': buildingId,
-      'zone_id': zoneId,
-      'floor_id': floorId,
-      "office_id": officeId
+      'building': buildingId,
+      'zone': zoneId,
+      'floor': floorId,
     });
     print('Produit inséré avec succès : $name');
   }

@@ -44,6 +44,8 @@ class DatabaseHelper {
       CREATE TABLE $buildingsTable (
 
         name TEXT
+        building_id INTEGER,
+
       )
     ''');
 
@@ -104,7 +106,7 @@ CREATE TABLE $ProductsTable (
   }
   //Product CRUD operations
 
-  Future<void> insertProduct(String name, String barcode, int buildingId, int zoneId, int floorId) async {
+  Future<void> insertProduct(String name, String barcode, String buildingId, String zoneId, String floorId, String officeId) async {
     final db = await instance.database;
     await db.insert( ProductsTable , {
       'name': name,
@@ -112,6 +114,7 @@ CREATE TABLE $ProductsTable (
       'building_id': buildingId,
       'zone_id': zoneId,
       'floor_id': floorId,
+      "office_id": officeId
     });
     print('Produit inséré avec succès : $name');
   }

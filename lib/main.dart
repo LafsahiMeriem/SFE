@@ -179,10 +179,10 @@ class Ajouter extends StatefulWidget {
 class _AjouterState extends State<Ajouter> {
   final TextEditingController _productController = TextEditingController();
   final TextEditingController _barcodeController = TextEditingController();
-  int? _selectedBuildingId;
-  int? _selectedZoneId;
-  int? _selectedFloorId;
-  int? _selectedOfficeId;
+  String? _selectedBuildingId;
+  String? _selectedZoneId;
+  String? _selectedFloorId;
+  String? _selectedOfficeId;
 
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
@@ -259,16 +259,16 @@ class _AjouterState extends State<Ajouter> {
   void _ajouterProduit() async {
     final String product = _productController.text;
     final String barcode = _barcodeController.text;
-    final int? selectedBuildingId = _selectedBuildingId;
-    final int? selectedZoneId = _selectedZoneId;
-    final int? selectedFloorId = _selectedFloorId;
-    final int? selectedOfficeId = _selectedOfficeId;
+    final String? selectedBuildingId = _selectedBuildingId;
+    final String? selectedZoneId = _selectedZoneId;
+    final String? selectedFloorId = _selectedFloorId;
+    final String? selectedOfficeId = _selectedOfficeId;
 
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
         selectedZoneId != null && selectedFloorId != null  && selectedOfficeId != null) {
       // Insérer les données du produit dans la base de données
       await DatabaseHelper.instance.insertProduct(
-          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId);
+          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId , selectedOfficeId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -307,26 +307,38 @@ class _AjouterState extends State<Ajouter> {
             children: [
               _buildTextField('Produit', _productController),
               _buildTextField('Code barre', _barcodeController),
-              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId as String?, (value) {
+              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
                 setState(() {
-                  _selectedBuildingId = (value as int);
+                  if (value != null) {
+                    _selectedBuildingId = value;
+                  }
                 });
               }),
-              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(_selectedBuildingId ?? 0), _selectedZoneId as String?, (value) {
+
+              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
                 setState(() {
-                  _selectedZoneId = (value as int);
+                  if (value != null) {
+                    _selectedZoneId = value;
+                  }
                 });
               }),
-              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(_selectedZoneId ?? 0), _selectedFloorId as String?, (value) {
+              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
                 setState(() {
-                  _selectedFloorId = (value as int);
+                  if (value != null) {
+                    _selectedFloorId = value;
+                  }
                 });
               }),
-               _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
-                 setState(() {
-                   _selectedOfficeId = (value as int);
-                 });
-               }),
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
+                setState(() {
+                  if (value != null) {
+                    _selectedOfficeId = value;
+                  }
+                });
+              }),
+
+
+
               const SizedBox(height: 32),
               _buildButton(context, 'Ajouter', _ajouterProduit),
             ],

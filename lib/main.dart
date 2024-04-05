@@ -266,24 +266,36 @@ class _AjouterState extends State<Ajouter> {
 
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
         selectedZoneId != null && selectedFloorId != null  && selectedOfficeId != null) {
-      // Insérer les données du produit dans la base de données
-      await DatabaseHelper.instance.insertProduct(
-          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId , selectedOfficeId);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Produit ajouté avec succès.'),
-        ),
-      );
+      // Vérifier que _selectedOfficeId n'est pas null
+      if (selectedOfficeId.isNotEmpty) {
+        // Insérer les données du produit dans la base de données
+        await DatabaseHelper.instance.insertProduct(
+            product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId , selectedOfficeId);
 
-      _productController.clear();
-      _barcodeController.clear();
-      setState(() {
-        _selectedBuildingId = null;
-        _selectedZoneId = null;
-        _selectedFloorId = null;
-        _selectedOfficeId = null;
-      });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produit ajouté avec succès.'),
+          ),
+        );
+
+        _productController.clear();
+        _barcodeController.clear();
+        setState(() {
+          _selectedBuildingId = null;
+          _selectedZoneId = null;
+          _selectedFloorId = null;
+          _selectedOfficeId = null;
+        });
+      } else {
+        // Afficher un message dans la console si _selectedOfficeId est null
+        print('selectedOfficeId est null.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Veuillez sélectionner un bureau.'),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -330,12 +342,11 @@ class _AjouterState extends State<Ajouter> {
                 });
               }),
               _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
-                setState(() {
-                  if (value != null) {
-                    _selectedOfficeId = value;
-                  }
-                });
+                if (value != null) {
+                  _selectedOfficeId = value;
+                }
               }),
+
 
 
 

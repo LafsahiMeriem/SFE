@@ -88,6 +88,7 @@ CREATE TABLE $ProductsTable (
   floor_id INTEGER,
   zone_id INTEGER,
   building_id INTEGER,
+  office_id INTEGER,
   FOREIGN KEY (office_id) REFERENCES $officesTable(id),
   FOREIGN KEY (floor_id) REFERENCES $floorsTable(id),
   FOREIGN KEY (zone_id) REFERENCES $zonesTable(id),

@@ -182,7 +182,7 @@ class _AjouterState extends State<Ajouter> {
   int? _selectedBuildingId;
   int? _selectedZoneId;
   int? _selectedFloorId;
- // int? _selectedOfficeId;
+  int? _selectedOfficeId;
 
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
@@ -262,10 +262,10 @@ class _AjouterState extends State<Ajouter> {
     final int? selectedBuildingId = _selectedBuildingId;
     final int? selectedZoneId = _selectedZoneId;
     final int? selectedFloorId = _selectedFloorId;
-  //  final int? selectedOfficeId = _selectedOfficeId;
+    final int? selectedOfficeId = _selectedOfficeId;
 
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
-        selectedZoneId != null && selectedFloorId != null ) {
+        selectedZoneId != null && selectedFloorId != null  && selectedOfficeId != null) {
       // Insérer les données du produit dans la base de données
       await DatabaseHelper.instance.insertProduct(
           product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId);
@@ -282,7 +282,7 @@ class _AjouterState extends State<Ajouter> {
         _selectedBuildingId = null;
         _selectedZoneId = null;
         _selectedFloorId = null;
-       // _selectedOfficeId = null;
+        _selectedOfficeId = null;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -322,11 +322,11 @@ class _AjouterState extends State<Ajouter> {
                   _selectedFloorId = (value as int);
                 });
               }),
-              // _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
-              //   setState(() {
-              //     _selectedOfficeId = (value as int);
-              //   });
-              // }),
+               _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(_selectedFloorId ?? 0), _selectedOfficeId as String?, (value) {
+                 setState(() {
+                   _selectedOfficeId = (value as int);
+                 });
+               }),
               const SizedBox(height: 32),
               _buildButton(context, 'Ajouter', _ajouterProduit),
             ],

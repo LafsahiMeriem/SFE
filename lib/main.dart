@@ -267,7 +267,6 @@ class _AjouterState extends State<Ajouter> {
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
         selectedZoneId != null && selectedFloorId != null  && selectedOfficeId != null) {
 
-      // Vérifier que _selectedOfficeId n'est pas null
       if (selectedOfficeId.isNotEmpty) {
         // Insérer les données du produit dans la base de données
         await DatabaseHelper.instance.insertProduct(
@@ -288,7 +287,6 @@ class _AjouterState extends State<Ajouter> {
           _selectedOfficeId = null;
         });
       } else {
-        // Afficher un message dans la console si _selectedOfficeId est null
         print('selectedOfficeId est null.');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -342,9 +340,11 @@ class _AjouterState extends State<Ajouter> {
                 });
               }),
               _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
-                if (value != null) {
-                  _selectedOfficeId = value;
-                }
+                setState(() {
+                  if (value != null) {
+                    _selectedOfficeId = value;
+                  }
+                });
               }),
 
 

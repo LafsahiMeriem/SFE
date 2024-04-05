@@ -40,19 +40,20 @@ class DatabaseHelper {
 
   Future<void> _createDatabase(Database db, int version) async {
     // Create buildings table
-    await db.execute('''
-      CREATE TABLE $buildingsTable (
+// Create buildings table
+    await db.execute("""
+  CREATE TABLE $buildingsTable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    building_id INTEGER
+  )
+""");
 
-        name TEXT
-        building_id INTEGER,
-
-      )
-    ''');
 
     // Create zones table
     await db.execute('''
       CREATE TABLE $zonesTable (
-
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         building_id INTEGER,
         name TEXT,
         FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
@@ -63,6 +64,7 @@ class DatabaseHelper {
     // Create floors table
     await db.execute('''
       CREATE TABLE $floorsTable (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
            zone_id INTEGER,
            floor_id INTEGER,
            name TEXT,
@@ -72,8 +74,8 @@ class DatabaseHelper {
 
     // Create offices table
     await db.execute('''
-    CREATE TABLE $officesTable (
-
+    CREATE TABLE $officesTable (      
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     floor_id INTEGER,
     zone_id INTEGER, 
     name TEXT,

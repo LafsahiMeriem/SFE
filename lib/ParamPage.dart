@@ -343,12 +343,12 @@ class _ZonePageState extends State<ZonePage> {
       ),
     )
         : ElevatedButton(
-      onPressed: () {
-        setState(() {
+         onPressed: () {
+           setState(() {
           _isAddingZone = true;
-        });
-      },
-      child: Text('Ajouter une zone'),
+           });
+        },
+        child: Text('Ajouter une zone'),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:datawedgeflutter/Csb.dart';
+import 'package:datawedgeflutter/Exporter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'EncoderPage.dart';
@@ -103,6 +104,13 @@ class MenuPage extends StatelessWidget {
         crossAxisSpacing: 16,
         mainAxisSpacing: 17,
         children: [
+
+          _buildMenuItem(context, 'Parametre', Icons.settings, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ParamPage()),
+            );
+          }),
           _buildMenuItem(context, 'Ajouter', Icons.add, () {
             Navigator.push(
               context,
@@ -127,13 +135,13 @@ class MenuPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => Csb()),
             );
           }),
-          _buildMenuItem(context, 'Exporter', Icons.file_download, () {}),
-          _buildMenuItem(context, 'Paramètre', Icons.settings, () {
+          _buildMenuItem(context, 'Exporter', Icons.file_download, () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ParamPage()),
+              MaterialPageRoute(builder: (context) => Exporter()),
             );
           }),
+
         ],
       ),
     );

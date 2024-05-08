@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:datawedgeflutter/Csb.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'EncoderPage.dart';
@@ -120,9 +121,11 @@ class MenuPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => EncoderPage()),
             );
           }),
-          _buildMenuItem(context, 'Scan', Icons.qr_code_scanner, () {
-            // Start barcode or QR code scan
-            startScan(context);
+          _buildMenuItem(context, 'CSB', Icons.launch, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Csb()),
+            );
           }),
           _buildMenuItem(context, 'Exporter', Icons.file_download, () {}),
           _buildMenuItem(context, 'Paramètre', Icons.settings, () {
@@ -166,6 +169,8 @@ class MenuPage extends StatelessWidget {
     );
   }
 }
+
+
 
 
 

@@ -65,6 +65,8 @@ class _ParamPageState extends State<ParamPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+
       appBar: AppBar(
         title: Text('Bâtiments'),
       ),
@@ -258,6 +260,8 @@ class _ZonePageState extends State<ZonePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+
       appBar: AppBar(
         title: Text('Zones de ${widget.buildingName}'),
       ),
@@ -424,6 +428,8 @@ class _FloorPageState extends State<FloorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+
       appBar: AppBar(
         title: Text('Étages de la zone ${widget.zoneName}'),
       ),
@@ -590,8 +596,9 @@ class _OfficePageState extends State<OfficePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Bureaux de l\'étage ${widget.floorName}'),
+        title: Text('zonex de l\'étage ${widget.floorName}'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

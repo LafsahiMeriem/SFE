@@ -223,10 +223,10 @@ class ZonePage extends StatefulWidget {
   @override
   _ZonePageState createState() => _ZonePageState();
 }
+
 class _ZonePageState extends State<ZonePage> {
   late TextEditingController _zoneController;
-  late DatabaseHelper databaseHelper;
-
+  late SharedPreferences _prefs;
   bool _isAddingZone = false;
   List<String> zones = [];
 
@@ -234,15 +234,13 @@ class _ZonePageState extends State<ZonePage> {
   void initState() {
     super.initState();
     _zoneController = TextEditingController();
-    databaseHelper = DatabaseHelper.instance;
-
     _loadZones();
   }
 
   Future<void> _loadZones() async {
-    final prefs = await SharedPreferences.getInstance();
+    _prefs = await SharedPreferences.getInstance();
     setState(() {
-      zones = prefs.getStringList('${widget.buildingName}_zones') ?? [];
+      zones = _prefs.getStringList('${widget.buildingName}_zones') ?? [];
     });
   }
 
@@ -252,16 +250,14 @@ class _ZonePageState extends State<ZonePage> {
     super.dispose();
   }
 
-
-
-
-
+  Future<void> _saveZones() async {
+    await _prefs.setStringList('${widget.buildingName}_zones', zones);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-
       appBar: AppBar(
         title: Text('Zones de ${widget.buildingName}'),
       ),
@@ -294,7 +290,10 @@ class _ZonePageState extends State<ZonePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FloorPage(zones[index], zoneId: index),
+                            builder: (context) => FloorPage(
+                              zones[index],
+                              zoneId: index,
+                            ),
                           ),
                         );
                       },
@@ -308,8 +307,6 @@ class _ZonePageState extends State<ZonePage> {
       ),
     );
   }
-
-
 
   Widget _buildAddZoneButton() {
     return _isAddingZone
@@ -334,12 +331,12 @@ class _ZonePageState extends State<ZonePage> {
               onPressed: () async {
                 String zoneName = _zoneController.text.trim();
                 if (zoneName.isNotEmpty) {
-                  await databaseHelper.insertZone(widget.buildingId, zoneName);
                   setState(() {
-                    _isAddingZone = false;
                     zones.add(zoneName);
+                    _zoneController.clear();
+                    _isAddingZone = false;
                   });
-                  _zoneController.clear();
+                  await _saveZones();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Zone ajoutée avec succès: $zoneName'),
@@ -354,22 +351,22 @@ class _ZonePageState extends State<ZonePage> {
       ),
     )
         : ElevatedButton(
-         onPressed: () {
-           setState(() {
+      onPressed: () {
+        setState(() {
           _isAddingZone = true;
-           });
-        },
-        child: Text('Ajouter une zone'),
+        });
+      },
+      child: Text('Ajouter une zone'),
     );
   }
 
   void _removeZone(int index) async {
     if (index >= 0 && index < zones.length) {
       String zoneName = zones[index];
-      await databaseHelper.deleteZone(widget.buildingId, index);
       setState(() {
         zones.removeAt(index);
       });
+      await _saveZones();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Zone supprimée avec succès'),
@@ -380,6 +377,7 @@ class _ZonePageState extends State<ZonePage> {
     }
   }
 }
+
 
 
 
@@ -558,31 +556,24 @@ class OfficePage extends StatefulWidget {
   @override
   _OfficePageState createState() => _OfficePageState();
 }
+
 class _OfficePageState extends State<OfficePage> {
   late TextEditingController _officeController;
+  late SharedPreferences _prefs;
   List<String> offices = [];
-  late DatabaseHelper databaseHelper;
   bool _isAddingOffice = false;
 
   @override
   void initState() {
     super.initState();
     _officeController = TextEditingController();
-    databaseHelper = DatabaseHelper.instance;
-    _loadOffices();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     _loadOffices();
   }
 
   Future<void> _loadOffices() async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String>? loadedOffices = prefs.getStringList('${widget.floorName}_offices');
+    _prefs = await SharedPreferences.getInstance();
     setState(() {
-      offices = loadedOffices ?? [];
+      offices = _prefs.getStringList('${widget.floorName}_offices') ?? [];
     });
   }
 
@@ -592,13 +583,16 @@ class _OfficePageState extends State<OfficePage> {
     super.dispose();
   }
 
-  @override
+  Future<void> _saveOffices() async {
+    await _prefs.setStringList('${widget.floorName}_offices', offices);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('zonex de l\'étage ${widget.floorName}'),
+        title: Text('Bureaux de ${widget.floorName}'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -615,7 +609,10 @@ class _OfficePageState extends State<OfficePage> {
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
-                      title: Text(offices[index], style: TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(
+                        offices[index],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       trailing: IconButton(
                         icon: Icon(Icons.delete),
                         onPressed: () {
@@ -661,7 +658,7 @@ class _OfficePageState extends State<OfficePage> {
                     _officeController.clear();
                     _isAddingOffice = false;
                   });
-                  await databaseHelper.insertOffice(widget.selectedFloorId!, officeName, widget.zoneId);
+                  await _saveOffices();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Bureau ajouté avec succès: $officeName'),
@@ -669,9 +666,7 @@ class _OfficePageState extends State<OfficePage> {
                   );
                 }
               },
-
-
-              child: Text('Ajouter un bureau'),
+              child: Text('Ajouter'),
             ),
           ],
         ),
@@ -687,15 +682,10 @@ class _OfficePageState extends State<OfficePage> {
     );
   }
 
-  Future<void> _saveOffice() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('${widget.floorName}_offices', offices);
-  }
-
   void _removeOffice(int index) async {
     if (index >= 0 && index < offices.length) {
       String removedOfficeName = offices.removeAt(index);
-      await databaseHelper.deleteOffice(widget.floorName, removedOfficeName);
+      await _saveOffices();
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -707,6 +697,7 @@ class _OfficePageState extends State<OfficePage> {
     }
   }
 }
+
 
 
 

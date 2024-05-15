@@ -164,12 +164,22 @@ CREATE TABLE $ProductsTable (
 
   // Zone CRUD operations
 
-  Future<void> insertZone(int buildingId, String name) async {
+  Future<String?> insertZone(int buildingId, String name) async {
     final db = await instance.database;
 
-    await db.insert(zonesTable, {'building_id': buildingId, 'name': name});
-    print('Zone inserted successfully: $name');
+    // Vérifier si la zone existe déjà pour ce bâtiment
+    List<Map<String, dynamic>> existingZones = await db.query(zonesTable,
+        where: 'building_id = ? AND name = ?', whereArgs: [buildingId, name]);
 
+    // Si la zone n'existe pas déjà, l'insérer
+    if (existingZones.isEmpty) {
+      await db.insert(zonesTable, {'building_id': buildingId, 'name': name});
+      print('Zone inserted successfully: $name');
+      return name; // Retourne le nom de la zone insérée
+    } else {
+      print('Zone already exists: $name');
+      return null; // Retourne null si la zone existe déjà
+    }
   }
 
   Future<List<Map<String, dynamic>>> getZonesForBuilding(int buildingId) async {

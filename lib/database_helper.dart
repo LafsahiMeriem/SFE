@@ -55,7 +55,7 @@ class DatabaseHelper {
       CREATE TABLE $zonesTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         building_id INTEGER,
-        name TEXT UNIQUE,
+        name TEXT,
         FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
 
       )

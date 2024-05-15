@@ -340,25 +340,26 @@ class _ZonePageState extends State<ZonePage> {
               onPressed: () async {
                 String zoneName = _zoneController.text.trim();
                 if (zoneName.isNotEmpty) {
-                  // Insérer la zone dans la base de données
-                  String? insertedZone =
-                  await DatabaseHelper.instance.insertZone(widget.buildingId, zoneName);
-                  if (insertedZone != null) {
+                  // Vérifier si la zone existe déjà pour ce bâtiment
+                  bool zoneExists = await DatabaseHelper.instance.zoneExistsForBuilding(widget.buildingId, zoneName);
+                  if (zoneExists) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('La zone existe déjà pour ce bâtiment: $zoneName'),
+                      ),
+                    );
+                  } else {
                     setState(() {
-                      zones.add(insertedZone);
+                      zones.add(zoneName);
                       _zoneController.clear();
                       _isAddingZone = false;
                     });
                     await _saveZones();
+                    // Insérer la zone dans la base de données
+                    await  DatabaseHelper.instance.insertZone(widget.buildingId, zoneName);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Zone ajoutée avec succès: $insertedZone'),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('La zone existe déjà: $zoneName'),
+                        content: Text('Zone ajoutée avec succès: $zoneName'),
                       ),
                     );
                   }
@@ -397,6 +398,7 @@ class _ZonePageState extends State<ZonePage> {
     }
   }
 }
+
 
 
 

@@ -400,9 +400,6 @@ class _ZonePageState extends State<ZonePage> {
 }
 
 
-
-
-
 class FloorPage extends StatefulWidget {
   final String zoneName;
   final int zoneId;
@@ -719,7 +716,6 @@ class _OfficePageState extends State<OfficePage> {
     }
   }
 }
-
 
 
 

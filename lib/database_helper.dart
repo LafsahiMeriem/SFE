@@ -172,6 +172,7 @@ CREATE TABLE $ProductsTable (
 
   }
 
+
   Future<bool> zoneExistsForBuilding(int buildingId, String zoneName) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> zones = await db.rawQuery(
@@ -231,7 +232,7 @@ CREATE TABLE $ProductsTable (
     if (result.isNotEmpty) {
       return result.first['id'] as int;
     } else {
-      return -1; // ou toute autre valeur qui indique qu'aucun étage n'a été trouvé
+      return -1;
     }
   }
 

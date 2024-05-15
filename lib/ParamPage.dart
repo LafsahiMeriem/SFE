@@ -154,19 +154,28 @@ class _ParamPageState extends State<ParamPage> {
               onPressed: () async {
                 String buildingName = _buildingController.text.trim();
                 if (buildingName.isNotEmpty) {
-                  await DatabaseHelper.instance.insertBuilding(buildingName);
-                  setState(() {
-                    _buildingController.clear();
-                    _isAddingBuilding = false;
-                    buildings.add(buildingName);
-                    filteredBuildings = List.from(buildings);
-                  });
-                  _saveBuildings();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Bâtiment ajouté avec succès: $buildingName'),
-                    ),
-                  );
+                  // Insérer le bâtiment dans la base de données
+                  String? insertedBuilding = await DatabaseHelper.instance.insertBuilding(buildingName);
+                  if (insertedBuilding != null) {
+                    setState(() {
+                      _buildingController.clear();
+                      _isAddingBuilding = false;
+                      buildings.add(insertedBuilding);
+                      filteredBuildings = List.from(buildings);
+                    });
+                    _saveBuildings();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Bâtiment ajouté avec succès: $insertedBuilding'),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Le bâtiment existe déjà: $buildingName'),
+                      ),
+                    );
+                  }
                 }
               },
               child: Text('Ajouter'),

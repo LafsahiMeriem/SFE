@@ -44,7 +44,7 @@ class DatabaseHelper {
     await db.execute("""
   CREATE TABLE $buildingsTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT UNIQUE,
     building_id INTEGER
   )
 """);
@@ -55,7 +55,7 @@ class DatabaseHelper {
       CREATE TABLE $zonesTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         building_id INTEGER,
-        name TEXT,
+        name TEXT UNIQUE,
         FOREIGN KEY (building_id) REFERENCES $buildingsTable(id)
 
       )
@@ -67,7 +67,7 @@ class DatabaseHelper {
            id INTEGER PRIMARY KEY AUTOINCREMENT,
            zone_id INTEGER,
            floor_id INTEGER,
-           name TEXT,
+           name TEXT UNIQUE,
            FOREIGN KEY (zone_id) REFERENCES $zonesTable(id)
       )
     ''');
@@ -78,7 +78,7 @@ class DatabaseHelper {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     floor_id INTEGER,
     zone_id INTEGER, 
-    name TEXT,
+    name TEXT UNIQUE,
     FOREIGN KEY (floor_id) REFERENCES $floorsTable(id),
     FOREIGN KEY (zone_id) REFERENCES $zonesTable(id) 
     )
@@ -130,14 +130,24 @@ CREATE TABLE $ProductsTable (
     log("Database deleted");
   }
 
-  Future<void> insertBuilding(String name) async {
+  Future<String?> insertBuilding(String name) async {
     final db = await instance.database;
-    await db.insert(buildingsTable, {
-      'name': name
-    });
-    print('Building inserted successfully: $name');
 
+    // Vérifier si le bâtiment existe déjà
+    List<Map<String, dynamic>> existingBuildings = await db.query(buildingsTable,
+        where: 'name = ?', whereArgs: [name]);
+
+    // Si le bâtiment n'existe pas déjà, l'insérer
+    if (existingBuildings.isEmpty) {
+      await db.insert(buildingsTable, {'name': name});
+      print('Building inserted successfully: $name');
+      return name; // Retourne le nom du bâtiment inséré
+    } else {
+      print('Building already exists: $name');
+      return null; // Retourne null si le bâtiment existe déjà
+    }
   }
+
 
   Future<List<Map<String, dynamic>>> getAllBuildings() async {
     final db = await instance.database;
@@ -156,6 +166,7 @@ CREATE TABLE $ProductsTable (
 
   Future<void> insertZone(int buildingId, String name) async {
     final db = await instance.database;
+
     await db.insert(zonesTable, {'building_id': buildingId, 'name': name});
     print('Zone inserted successfully: $name');
 

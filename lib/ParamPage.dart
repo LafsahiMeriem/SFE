@@ -259,6 +259,7 @@ class _ZonePageState extends State<ZonePage> {
     super.dispose();
   }
 
+
   Future<void> _saveZones() async {
     await _prefs.setStringList('${widget.buildingName}_zones', zones);
   }
@@ -436,6 +437,12 @@ class _FloorPageState extends State<FloorPage> {
     });
   }
 
+  Future<bool> _floorExists(String floorName) async {
+    int floorId = await databaseHelper.getFloorId(widget.zoneId, floorName);
+    return floorId != -1;
+  }
+
+
   @override
   void dispose() {
     _floorController.dispose();
@@ -518,17 +525,26 @@ class _FloorPageState extends State<FloorPage> {
               onPressed: () async {
                 String floorName = _floorController.text.trim();
                 if (floorName.isNotEmpty) {
-                  await databaseHelper.insertFloor(widget.zoneId, floorName, floors.length + 1);
-                  setState(() {
-                    floors.add(floorName);
-                    _floorController.clear();
-                    _isAddingFloor = false;
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Étage ajouté avec succès: $floorName'),
-                    ),
-                  );
+                  bool exists = await _floorExists(floorName);
+                  if (exists) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Étage déjà existant dans cette zone: $floorName'),
+                      ),
+                    );
+                  } else {
+                    await databaseHelper.insertFloor(widget.zoneId, floorName, floors.length + 1);
+                    setState(() {
+                      floors.add(floorName);
+                      _floorController.clear();
+                      _isAddingFloor = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Étage ajouté avec succès: $floorName'),
+                      ),
+                    );
+                  }
                 }
               },
               child: Text('Ajouter'),

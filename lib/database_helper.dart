@@ -206,10 +206,6 @@ CREATE TABLE $ProductsTable (
   }
 
 
-  Future<List<Map<String, dynamic>>> getFloorsForZone(int zoneId) async {
-    final db = await instance.database;
-    return await db.query(floorsTable, where: 'zone_id = ?', whereArgs: [zoneId]);
-  }
 
   Future<void> deleteFloor(int zoneId, String floorName) async {
     final db = await instance.database;
@@ -256,6 +252,15 @@ CREATE TABLE $ProductsTable (
     final db = await instance.database;
     return await db.query(officesTable, where: 'floor_id = ?', whereArgs: [floorId]);
   }
+
+
+
+
+  Future<List<Map<String, dynamic>>> getFloorsForZone(int zoneId) async {
+    final db = await instance.database;
+    return await db.query(floorsTable, where: 'zone_id = ?', whereArgs: [zoneId]);
+  }
+
 
   Future<void> deleteOffice(String floorName, String officeName) async {
     final db = await instance.database;

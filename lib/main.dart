@@ -198,6 +198,7 @@ class _AjouterState extends State<Ajouter> {
   String? _selectedOfficeId;
 
 
+
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -345,7 +346,7 @@ class _AjouterState extends State<Ajouter> {
                 });
               }),
 
-              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId  ?? '') ?? 1), _selectedOfficeId, (value) {
                 setState(() {
                   if (value != null) {
                     _selectedOfficeId = value;

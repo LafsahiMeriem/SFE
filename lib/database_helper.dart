@@ -278,6 +278,16 @@ CREATE TABLE $ProductsTable (
     );
   }
 
+  Future<bool> officeExists(int floorId, String officeName) async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query(
+      officesTable,
+      where: 'floor_id = ? AND name = ?',
+      whereArgs: [floorId, officeName],
+    );
+    return result.isNotEmpty;
+  }
+
 
 
 }

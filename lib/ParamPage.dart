@@ -622,6 +622,16 @@ class _OfficePageState extends State<OfficePage> {
     await _prefs.setStringList('${widget.floorName}_offices', offices);
   }
 
+  Future<bool> _officeExists(String officeName) async {
+    final db = await DatabaseHelper.instance.database;
+    List<Map<String, dynamic>> result = await db.query(
+      'offices',
+      where: 'floor_id = ? AND name = ?',
+      whereArgs: [widget.selectedFloorId, officeName],
+    );
+    return result.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -688,17 +698,27 @@ class _OfficePageState extends State<OfficePage> {
               onPressed: () async {
                 String officeName = _officeController.text.trim();
                 if (officeName.isNotEmpty) {
-                  setState(() {
-                    offices.add(officeName);
-                    _officeController.clear();
-                    _isAddingOffice = false;
-                  });
-                  await _saveOffices();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Bureau ajouté avec succès: $officeName'),
-                    ),
-                  );
+                  bool exists = await _officeExists(officeName);
+                  if (exists) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Bureau déjà existant dans cet étage: $officeName'),
+                      ),
+                    );
+                  } else {
+                    setState(() {
+                      offices.add(officeName);
+                      _officeController.clear();
+                      _isAddingOffice = false;
+                    });
+                    await _saveOffices();
+                    await DatabaseHelper.instance.insertOffice(widget.selectedFloorId!, officeName, widget.zoneId);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Bureau ajouté avec succès: $officeName'),
+                      ),
+                    );
+                  }
                 }
               },
               child: Text('Ajouter'),
@@ -721,6 +741,7 @@ class _OfficePageState extends State<OfficePage> {
     if (index >= 0 && index < offices.length) {
       String removedOfficeName = offices.removeAt(index);
       await _saveOffices();
+      // You should also remove the office from the database if necessary
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -732,6 +753,7 @@ class _OfficePageState extends State<OfficePage> {
     }
   }
 }
+
 
 
 

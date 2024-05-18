@@ -365,23 +365,3 @@ class _AjouterState extends State<Ajouter> {
 }
 
 
-void startScan(BuildContext context) {
-  const MethodChannel methodChannel =
-  MethodChannel('com.darryncampbell.datawedgeflutter/command');
-  methodChannel
-      .invokeMethod(
-    'sendDataWedgeCommandStringParameter',
-    jsonEncode({
-      "command": "com.symbol.datawedge.api.SOFT_SCAN_TRIGGER",
-      "parameter": "START_SCANNING"
-    }),
-  )
-      .then((_) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Scan démarré'),
-        duration: Duration(seconds: 1),
-      ),
-    );
-  });
-}

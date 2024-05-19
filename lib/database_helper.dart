@@ -120,6 +120,11 @@ CREATE TABLE $ProductsTable (
     print('Produit inséré avec succès : $name');
   }
 
+  Future<List<Map<String, dynamic>>> getProduits() async {
+    final db = await instance.database;
+    return await db.query(ProductsTable);
+  }
+
 
   // Building CRUD operations
   Future<void> deleteDatabaseFile() async {

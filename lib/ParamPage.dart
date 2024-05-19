@@ -40,6 +40,30 @@ class _ParamPageState extends State<ParamPage> {
     _loadBuildings(); // Charger les bâtiments chaque fois que la dépendance de la page change
   }
 
+  Future<bool?> _showConfirmationDialog() async {
+    return showDialog<bool?>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirmation'),
+        content: Text('Are you sure you want to delete all data?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // Return false if not confirmed
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true); // Return true if confirmed
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _loadBuildings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -63,10 +87,10 @@ class _ParamPageState extends State<ParamPage> {
 
   @override
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-
       appBar: AppBar(
         title: Text('Bâtiments'),
       ),
@@ -76,7 +100,7 @@ class _ParamPageState extends State<ParamPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: 16),
-            _buildAddBuildingButton(), // Placer la carte d'ajout en haut de la colonne
+            _buildAddBuildingButton(),
             SizedBox(height: 16),
             Expanded(
               child: SingleChildScrollView(
@@ -115,6 +139,28 @@ class _ParamPageState extends State<ParamPage> {
                     ),
                   ],
                 ),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                bool? confirmed = await _showConfirmationDialog();
+                if (confirmed != null && confirmed) {
+                  await DatabaseHelper.instance.deleteDatabaseFile(); // Supprime tout le contenu de la base de données
+                  setState(() {
+                    buildings.clear(); // Efface la liste des bâtiments
+                    filteredBuildings.clear(); // Efface la liste des bâtiments filtrés
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('La base de données a été complètement supprimée.'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Supprimer toute la base de données'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Couleur rouge pour indiquer un danger
               ),
             ),
           ],
@@ -753,6 +799,8 @@ class _OfficePageState extends State<OfficePage> {
     }
   }
 }
+
+
 
 
 

@@ -54,19 +54,27 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Color(0xFFFF6E40), // Color for product card
       margin: EdgeInsets.all(8.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Name: ${product['name']}', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+            Text(
+              'Name: ${product['name']}',
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Text color
+              ),
+            ),
             SizedBox(height: 4.0),
-            Text('Code barre: ${product['barcode']}'),
-            Text('Bâtiment: ${product['building_id']}'),
-            Text('Zone: ${product['zone_id']}'),
-            Text('Étage: ${product['floor_id']}'),
-            Text('Bureau: ${product['office_id']}'),
+            Text('Code barre: ${product['barcode']}', style: TextStyle(color: Colors.white)),
+            Text('Bâtiment: ${product['building_id']}', style: TextStyle(color: Colors.white)),
+            Text('Zone: ${product['zone_id']}', style: TextStyle(color: Colors.white)),
+            Text('Étage: ${product['floor_id']}', style: TextStyle(color: Colors.white)),
+            Text('Bureau: ${product['office_id']}', style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
@@ -99,5 +107,7 @@ class Exporter extends StatelessWidget {
 void main() {
   runApp(MaterialApp(
     home: Exporter(),
+    theme: ThemeData(
+    ),
   ));
 }

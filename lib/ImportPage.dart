@@ -1,130 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:excel/excel.dart';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
-import 'database_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'database_helper.dart'; // Assurez-vous que ce chemin est correct
 
-class ImportPage extends StatefulWidget {
-  const ImportPage({Key? key}) : super(key: key);
-
+class ImporterPage extends StatefulWidget {
   @override
-  _ImportPageState createState() => _ImportPageState();
+  _ImporterPageState createState() => _ImporterPageState();
 }
 
-class _ImportPageState extends State<ImportPage> {
-  List<String> _filePaths = [];
+class _ImporterPageState extends State<ImporterPage> {
+  final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+
+  Future<void> exportToFile(BuildContext context) async {
+    // Demander la permission de lire/écrire les fichiers
+    if (await Permission.storage.request().isGranted) {
+      try {
+        List<Map<String, dynamic>> produits = await _databaseHelper.getProduits();
+
+        var excel = Excel.createExcel();
+        Sheet sheetObject = excel['Produits'];
+
+        // Ajouter les en-têtes
+        sheetObject.appendRow([
+          'Name', 'Barcode', 'Building ID', 'Zone ID', 'Floor ID', 'Office ID'
+        ]);
+
+        // Ajouter les produits
+        for (var produit in produits) {
+          sheetObject.appendRow([
+            produit['name'],
+            produit['barcode'],
+            produit['building_id'],
+            produit['zone_id'],
+            produit['floor_id'],
+            produit['office_id']
+          ]);
+        }
+
+        // Enregistrer le fichier Excel
+        final directory = await getExternalStorageDirectory();
+        String filePath = '${directory!.path}/produits.xlsx';
+        File(filePath)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(excel.encode()!);
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Produits exportés avec succès vers $filePath'),
+        ));
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erreur lors de l\'exportation des produits: $e'),
+        ));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Permission de stockage refusée'),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Importation'),
+        title: Text('Exporter Produits'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Sélectionnez un fichier à importer :',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await _requestPermissionAndPickFiles();
-              },
-              child: Text('Importer un fichier'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (_filePaths.isNotEmpty) {
-                  _downloadFile(_filePaths.first);
-                } else {
-                  print('Aucun fichier sélectionné');
-                }
-              },
-              child: Text('Télécharger'),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filePaths.length,
-                itemBuilder: (context, index) {
-                  final filePath = _filePaths[index];
-                  return ListTile(
-                    title: Text(filePath.split('/').last),
-                    onTap: () {
-                      _importFile(filePath);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+        child: ElevatedButton(
+          onPressed: () => exportToFile(context),
+          child: Text('Exporter vers fichier Excel'),
         ),
       ),
     );
-  }
-
-  Future<void> _requestPermissionAndPickFiles() async {
-    var status = await Permission.storage.request();
-    if (status.isGranted) {
-      List<String>? filePaths = await pickFiles();
-      if (filePaths != null) {
-        setState(() {
-          _filePaths = filePaths;
-        });
-      }
-    } else {
-      // L'utilisateur a refusé la permission, affichez un message ou effectuez une action appropriée
-      print('Permission refusée');
-    }
-  }
-
-  Future<List<String>?> pickFiles() async {
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        type: FileType.custom,
-        allowedExtensions: ['xls', 'xlsx'],
-      );
-
-      if (result != null) {
-        List<String> filePaths = result.paths.map((path) => path!).toList();
-        return filePaths;
-      }
-      return null;
-    } catch (e) {
-      print('Erreur lors de la sélection des fichiers: $e');
-      return null;
-    }
-  }
-
-  void _importFile(String filePath) async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final destinationFilePath = '${directory.path}/${filePath.split('/').last}';
-
-      await File(filePath).copy(destinationFilePath);
-      print('Fichier importé avec succès dans : $destinationFilePath');
-    } catch (e) {
-      print('Erreur lors de l\'importation du fichier : $e');
-    }
-  }
-
-  Future<void> _downloadFile(String filePath) async {
-    try {
-      final bytes = File(filePath).readAsBytesSync();
-      final fileName = filePath.split('/').last;
-      final directory = await getExternalStorageDirectory();
-      final savePath = '${directory!.path}/$fileName';
-
-      await File(savePath).writeAsBytes(bytes);
-      print('Fichier téléchargé avec succès dans : $savePath');
-    } catch (e) {
-      print('Erreur lors du téléchargement du fichier : $e');
-    }
   }
 }

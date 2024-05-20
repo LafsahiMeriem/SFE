@@ -120,7 +120,7 @@ class MenuPage extends StatelessWidget {
           _buildMenuItem(context, 'Importer', Icons.file_upload, () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ImportPage()),
+              MaterialPageRoute(builder: (context) => ImporterPage()),
             );
           }),
           _buildMenuItem(context, 'Encoder', Icons.qr_code, () {

@@ -88,7 +88,7 @@ class DatabaseHelper {
     await db.execute('''
 CREATE TABLE $ProductsTable (
   name TEXT,
-  barcode TEXT,
+  barcode TEXT UNIQUE,
   floor_id INTEGER,
   zone_id INTEGER,
   building_id INTEGER,
@@ -124,6 +124,17 @@ CREATE TABLE $ProductsTable (
     final db = await instance.database;
     return await db.query(ProductsTable);
   }
+
+  Future<bool> barcodeExists(String barcode) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> result = await db.query(
+      ProductsTable,
+      where: 'barcode = ?',
+      whereArgs: [barcode],
+    );
+    return result.isNotEmpty;
+  }
+
 
 
   // Building CRUD operations

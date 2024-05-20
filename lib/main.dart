@@ -280,24 +280,34 @@ class _AjouterState extends State<Ajouter> {
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
         selectedZoneId != null && selectedFloorId != null && selectedOfficeId != null) {
 
-      // Insérer les données du produit dans la base de données
-      await DatabaseHelper.instance.insertProduct(
-          product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId, selectedOfficeId);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Produit ajouté avec succès.'),
-        ),
-      );
+      bool exists = await DatabaseHelper.instance.barcodeExists(barcode);
+      if (exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Le code barre existe déja pour un produit , entré un autre code barre'),
+          ),
+        );
+      } else {
+        // Insérer les données du produit dans la base de données
+        await DatabaseHelper.instance.insertProduct(
+            product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId, selectedOfficeId);
 
-      _productController.clear();
-      _barcodeController.clear();
-      setState(() {
-        _selectedBuildingId = null;
-        _selectedZoneId = null;
-        _selectedFloorId = null;
-        _selectedOfficeId = null;
-      });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produit ajouté avec succès.'),
+          ),
+        );
+
+        _productController.clear();
+        _barcodeController.clear();
+        setState(() {
+          _selectedBuildingId = null;
+          _selectedZoneId = null;
+          _selectedFloorId = null;
+          _selectedOfficeId = null;
+        });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

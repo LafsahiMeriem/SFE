@@ -24,11 +24,6 @@ class _ImporterPageState extends State<ImporterPage> {
         var excel = Excel.createExcel();
         Sheet sheetObject = excel['Produits'];
 
-        // Ajouter les en-têtes
-        sheetObject.appendRow([
-          'Name', 'Barcode', 'Building ID', 'Zone ID', 'Floor ID', 'Office ID'
-        ]);
-
         // Ajouter les produits
         for (var produit in produits) {
           sheetObject.appendRow([
@@ -67,12 +62,12 @@ class _ImporterPageState extends State<ImporterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Exporter Produits'),
+        title: Text('Importer Produits'),
       ),
       body: Center(
         child: ElevatedButton(
           onPressed: () => exportToFile(context),
-          child: Text('Exporter vers fichier Excel'),
+          child: Text('Importer le fichier Excel'),
         ),
       ),
     );

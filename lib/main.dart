@@ -197,8 +197,6 @@ class _AjouterState extends State<Ajouter> {
   String? _selectedFloorId;
   String? _selectedOfficeId;
 
-
-
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -325,36 +323,30 @@ class _AjouterState extends State<Ajouter> {
               _buildTextField('Code barre', _barcodeController),
               _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
                 setState(() {
-                  if (value != null) {
-                    _selectedBuildingId = value;
-                  }
+                  _selectedBuildingId = value;
+                  _selectedZoneId = null; // Reset dependent dropdown
+                  _selectedFloorId = null; // Reset dependent dropdown
+                  _selectedOfficeId = null; // Reset dependent dropdown
                 });
               }),
-
               _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
                 setState(() {
-                  if (value != null) {
-                    _selectedZoneId = value;
-                  }
+                  _selectedZoneId = value;
+                  _selectedFloorId = null; // Reset dependent dropdown
+                  _selectedOfficeId = null; // Reset dependent dropdown
                 });
               }),
               _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
                 setState(() {
-                  if (value != null) {
-                    _selectedFloorId = value;
-                  }
+                  _selectedFloorId = value;
+                  _selectedOfficeId = null; // Reset dependent dropdown
                 });
               }),
-
-              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId  ?? '') ?? 1), _selectedOfficeId, (value) {
+              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
                 setState(() {
-                  if (value != null) {
-                    _selectedOfficeId = value;
-                  }
+                  _selectedOfficeId = value;
                 });
               }),
-
-
               const SizedBox(height: 32),
               _buildButton(context, 'Ajouter', _ajouterProduit),
             ],

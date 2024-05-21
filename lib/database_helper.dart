@@ -134,6 +134,15 @@ CREATE TABLE $ProductsTable (
     );
     return result.isNotEmpty;
   }
+  Future<void> insertProductWithBarcode(String name, String barcode) async {
+    final db = await instance.database;
+    await db.insert(ProductsTable, {
+      'name': name,
+      'barcode': barcode,
+    });
+    print('Produit inséré avec succès : $name, Barcode: $barcode');
+  }
+
 
 
 

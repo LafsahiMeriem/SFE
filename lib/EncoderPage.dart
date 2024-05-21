@@ -105,6 +105,48 @@ class ProductWithoutCodePage extends StatelessWidget {
     return await dbHelper.selectData(sql: "SELECT * FROM ${DatabaseHelper.ProductsTable} WHERE barcode = '' OR barcode IS NULL");
   }
 
+  Future<void> _showBarcodeInputDialog(BuildContext context, String productName) async {
+    String barcode = ''; // Valeur par défaut du code-barres
+    bool barcodeExists = false;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ajouter un code-barres pour $productName'),
+          content: TextField(
+            onChanged: (value) => barcode = value,
+            decoration: InputDecoration(hintText: 'Entrez le code-barres'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Fermer la boîte de dialogue
+              },
+              child: Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                barcodeExists = await dbHelper.barcodeExists(barcode);
+                if (barcodeExists) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Le code-barres existe déjà.'),
+                    ),
+                  );
+                } else {
+                  await dbHelper.insertProductWithBarcode(productName, barcode);
+                  Navigator.pop(context); // Fermer la boîte de dialogue
+                }
+              },
+              child: Text('Ajouter'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,10 +167,14 @@ class ProductWithoutCodePage extends StatelessWidget {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 var product = snapshot.data![index];
-                return Card(
-                  color: Color(0xFFFF6E40),
-                  child: ListTile(
-                    title: Text(product['name']),
+                String productName = product['name'];
+                return ListTile(
+                  title: Text(productName),
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                      _showBarcodeInputDialog(context, productName);
+                    },
+                    child: Text('Ajouter code-barres'),
                   ),
                 );
               },

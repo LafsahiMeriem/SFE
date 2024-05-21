@@ -98,7 +98,12 @@ class ProductWithCodePage extends StatelessWidget {
   }
 }
 
-class ProductWithoutCodePage extends StatelessWidget {
+class ProductWithoutCodePage extends StatefulWidget {
+  @override
+  _ProductWithoutCodePageState createState() => _ProductWithoutCodePageState();
+}
+
+class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
   final DatabaseHelper dbHelper = DatabaseHelper.instance;
 
   Future<List<Map<String, dynamic>>> _fetchProducts() async {
@@ -135,8 +140,9 @@ class ProductWithoutCodePage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  await dbHelper.insertProductWithBarcode(productName, barcode);
+                  await dbHelper.moveProductToWithCodePage(productName, barcode); // Déplacer le produit vers la page des produits avec code barre
                   Navigator.pop(context); // Fermer la boîte de dialogue
+                  setState(() {}); // Actualiser la page
                 }
               },
               child: Text('Ajouter'),
@@ -163,21 +169,34 @@ class ProductWithoutCodePage extends StatelessWidget {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('Aucun produit sans code barre trouvé.'));
           } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                var product = snapshot.data![index];
-                String productName = product['name'];
-                return ListTile(
-                  title: Text(productName),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      _showBarcodeInputDialog(context, productName);
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      var product = snapshot.data![index];
+                      String productName = product['name'];
+                      return ListTile(
+                        title: Text(productName),
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            _showBarcodeInputDialog(context, productName);
+                          },
+                          child: Text('Ajouter code-barres'),
+                        ),
+                      );
                     },
-                    child: Text('Ajouter code-barres'),
                   ),
-                );
-              },
+                ),
+                FloatingActionButton(
+                  onPressed: () {
+                    // Recharger la liste des produits
+                    setState(() {}); // Actualiser la page
+                  },
+                  child: Icon(Icons.refresh),
+                ),
+              ],
             );
           }
         },

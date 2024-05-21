@@ -143,6 +143,27 @@ CREATE TABLE $ProductsTable (
     print('Produit inséré avec succès : $name, Barcode: $barcode');
   }
 
+  Future<void> moveProductToWithCodePage(String productName, String barcode) async {
+    final db = await instance.database;
+
+    // Insérer le produit dans la page des produits avec code barre
+    await db.insert(ProductsTable, {
+      'name': productName,
+      'barcode': barcode,
+      'building_id': null,
+      'zone_id': null,
+      'floor_id': null,
+      'office_id': null,
+    });
+
+    // Supprimer le produit de la page des produits sans code barre
+    await db.delete(
+      ProductsTable,
+      where: 'name = ? AND (barcode = "" OR barcode IS NULL)',
+      whereArgs: [productName],
+    );
+  }
+
 
 
 

@@ -120,6 +120,7 @@ CREATE TABLE $ProductsTable (
     print('Produit inséré avec succès : $name');
   }
 
+
   Future<List<Map<String, dynamic>>> getProduits() async {
     final db = await instance.database;
     return await db.query(ProductsTable);
@@ -146,22 +147,44 @@ CREATE TABLE $ProductsTable (
   Future<void> moveProductToWithCodePage(String productName, String barcode) async {
     final db = await instance.database;
 
-    // Insérer le produit dans la page des produits avec code barre
-    await db.insert(ProductsTable, {
-      'name': productName,
-      'barcode': barcode,
-      'building_id': null,
-      'zone_id': null,
-      'floor_id': null,
-      'office_id': null,
-    });
-
-    // Supprimer le produit de la page des produits sans code barre
-    await db.delete(
+    // Retrieve the product details before moving
+    final List<Map<String, dynamic>> product = await db.query(
       ProductsTable,
       where: 'name = ? AND (barcode = "" OR barcode IS NULL)',
       whereArgs: [productName],
     );
+
+    if (product.isNotEmpty) {
+      // Get the first product (there should only be one match)
+      final productDetails = product.first;
+
+      // Insert the product into the page of products with barcode, retaining the other attributes
+      await db.insert(ProductsTable, {
+        'name': productName,
+        'barcode': barcode,
+        'building_id': productDetails['building_id'],
+        'zone_id': productDetails['zone_id'],
+        'floor_id': productDetails['floor_id'],
+        'office_id': productDetails['office_id'],
+      });
+
+      // Delete the product from the page of products without barcode
+      await db.delete(
+        ProductsTable,
+        where: 'name = ? AND (barcode = "" OR barcode IS NULL)',
+        whereArgs: [productName],
+      );
+    }
+  }
+
+  Future<void> deleteProduct(String productName) async {
+    final db = await instance.database;
+    await db.delete(
+      ProductsTable,
+      where: 'name = ?',
+      whereArgs: [productName],
+    );
+    print('Produit supprimé avec succès : $productName');
   }
 
 

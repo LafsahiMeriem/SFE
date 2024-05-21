@@ -82,11 +82,48 @@ class ProductWithCodePage extends StatelessWidget {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 var product = snapshot.data![index];
-                return Card(
-                  color: Color(0xFFFF6E40),
-                  child: ListTile(
-                    title: Text(product['name']),
-                    subtitle: Text('Code barre: ${product['barcode']}'),
+                return Dismissible(
+                  key: Key(product['name']),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Confirmer la suppression"),
+                          content: Text("Voulez-vous supprimer ce produit ?"),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text("Annuler"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text("Supprimer"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  onDismissed: (direction) {
+                    dbHelper.deleteProduct(product['name']);
+                  },
+                  child: Card(
+                    color: Color(0xFFFF6E40),
+                    child: ListTile(
+                      title: Text(product['name']),
+                      subtitle: Text('Code barre: ${product['barcode']}'),
+                    ),
                   ),
                 );
               },
@@ -97,7 +134,6 @@ class ProductWithCodePage extends StatelessWidget {
     );
   }
 }
-
 class ProductWithoutCodePage extends StatefulWidget {
   @override
   _ProductWithoutCodePageState createState() => _ProductWithoutCodePageState();
@@ -111,7 +147,7 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
   }
 
   Future<void> _showBarcodeInputDialog(BuildContext context, String productName) async {
-    String barcode = ''; // Valeur par défaut du code-barres
+    String barcode = '';
     bool barcodeExists = false;
 
     await showDialog(
@@ -126,7 +162,7 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Fermer la boîte de dialogue
+                Navigator.pop(context);
               },
               child: Text('Annuler'),
             ),
@@ -140,9 +176,9 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
                     ),
                   );
                 } else {
-                  await dbHelper.moveProductToWithCodePage(productName, barcode); // Déplacer le produit vers la page des produits avec code barre
-                  Navigator.pop(context); // Fermer la boîte de dialogue
-                  setState(() {}); // Actualiser la page
+                  await dbHelper.moveProductToWithCodePage(productName, barcode);
+                  Navigator.pop(context);
+                  setState(() {});
                 }
               },
               child: Text('Ajouter'),

@@ -62,7 +62,6 @@ class ProductWithCodePage extends StatelessWidget {
     return await dbHelper.selectData(sql: "SELECT * FROM ${DatabaseHelper.ProductsTable} WHERE barcode != '' AND barcode IS NOT NULL");
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,9 +82,12 @@ class ProductWithCodePage extends StatelessWidget {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 var product = snapshot.data![index];
-                return ListTile(
-                  title: Text(product['name']),
-                  subtitle: Text('Code barre: ${product['barcode']}'),
+                return Card(
+                  color: Color(0xFFFF6E40),
+                  child: ListTile(
+                    title: Text(product['name']),
+                    subtitle: Text('Code barre: ${product['barcode']}'),
+                  ),
                 );
               },
             );
@@ -102,8 +104,6 @@ class ProductWithoutCodePage extends StatelessWidget {
   Future<List<Map<String, dynamic>>> _fetchProducts() async {
     return await dbHelper.selectData(sql: "SELECT * FROM ${DatabaseHelper.ProductsTable} WHERE barcode = '' OR barcode IS NULL");
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,8 +125,11 @@ class ProductWithoutCodePage extends StatelessWidget {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 var product = snapshot.data![index];
-                return ListTile(
-                  title: Text(product['name']),
+                return Card(
+                  color: Color(0xFFFF6E40),
+                  child: ListTile(
+                    title: Text(product['name']),
+                  ),
                 );
               },
             );

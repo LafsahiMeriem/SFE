@@ -280,12 +280,11 @@ class _AjouterState extends State<Ajouter> {
     if (product.isNotEmpty && barcode.isNotEmpty && selectedBuildingId != null &&
         selectedZoneId != null && selectedFloorId != null && selectedOfficeId != null) {
 
-
       bool exists = await DatabaseHelper.instance.barcodeExists(barcode);
       if (exists) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Le code barre existe déja pour un produit , entré un autre code barre'),
+            content: Text('Le code barre existe déjà pour un produit, veuillez entrer un autre code barre.'),
           ),
         );
       } else {
@@ -311,9 +310,28 @@ class _AjouterState extends State<Ajouter> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez remplir tous les champs.'),
+          content: Text('Certaines informations manquent. Le produit sera quand même ajouté.'),
         ),
       );
+
+      // Insérer les données du produit dans la base de données même si certains champs sont vides
+      await DatabaseHelper.instance.insertProduct(
+          product, barcode, selectedBuildingId ?? '', selectedZoneId ?? '', selectedFloorId ?? '', selectedOfficeId ?? '');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produit ajouté avec succès.'),
+        ),
+      );
+
+      _productController.clear();
+      _barcodeController.clear();
+      setState(() {
+        _selectedBuildingId = null;
+        _selectedZoneId = null;
+        _selectedFloorId = null;
+        _selectedOfficeId = null;
+      });
     }
   }
 

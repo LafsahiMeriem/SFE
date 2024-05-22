@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+
 import 'package:excel/excel.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,23 +15,28 @@ class _ImporterPageState extends State<ImporterPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
 
   Future<void> exportToFile(BuildContext context) async {
-    // Demander la permission de lire/écrire les fichiers
     if (await Permission.storage.request().isGranted) {
       try {
         List<Map<String, dynamic>> produits = await _databaseHelper.getProduits();
 
+        // Debugging: Print the retrieved products
+        print("Retrieved products: $produits");
+
         var excel = Excel.createExcel();
         Sheet sheetObject = excel['Produits'];
+
+        // Ajouter les en-têtes de colonnes (facultatif, mais recommandé)
+        sheetObject.appendRow(['Nom du produit', 'Code barre', 'Etage', 'Zone', 'Batiment', 'Bureau']);
 
         // Ajouter les produits
         for (var produit in produits) {
           sheetObject.appendRow([
-            produit['name'],
-            produit['barcode'],
-            produit['building_id'],
-            produit['zone_id'],
-            produit['floor_id'],
-            produit['office_id']
+            produit['name'] ?? '',
+            produit['barcode'] ?? '',
+            produit['floor_id']?.toString() ?? '',
+            produit['zone_id']?.toString() ?? '',
+            produit['building_id']?.toString() ?? '',
+            produit['office_id']?.toString() ?? ''
           ]);
         }
 

@@ -95,8 +95,11 @@ class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Menu Page'),
+        title: const Text('Menu Page', style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.black,
+
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -338,46 +341,51 @@ class _AjouterState extends State<Ajouter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Ajouter'),
+        title: const Text('Ajouter', style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.black,
       ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTextField('Produit', _productController),
-              _buildTextField('Code barre', _barcodeController),
-              _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
-                setState(() {
-                  _selectedBuildingId = value;
-                  _selectedZoneId = null; // Reset dependent dropdown
-                  _selectedFloorId = null; // Reset dependent dropdown
-                  _selectedOfficeId = null; // Reset dependent dropdown
-                });
-              }),
-              _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
-                setState(() {
-                  _selectedZoneId = value;
-                  _selectedFloorId = null; // Reset dependent dropdown
-                  _selectedOfficeId = null; // Reset dependent dropdown
-                });
-              }),
-              _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
-                setState(() {
-                  _selectedFloorId = value;
-                  _selectedOfficeId = null; // Reset dependent dropdown
-                });
-              }),
-              _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
-                setState(() {
-                  _selectedOfficeId = value;
-                });
-              }),
-              const SizedBox(height: 32),
-              _buildButton(context, 'Ajouter', _ajouterProduit),
-            ],
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Image.asset('assets/building_image.png'),
+                _buildTextField('Produit', _productController),
+                _buildTextField('Code barre', _barcodeController),
+                _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
+                  setState(() {
+                    _selectedBuildingId = value;
+                    _selectedZoneId = null; // Reset dependent dropdown
+                    _selectedFloorId = null; // Reset dependent dropdown
+                    _selectedOfficeId = null; // Reset dependent dropdown
+                  });
+                }),
+                _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
+                  setState(() {
+                    _selectedZoneId = value;
+                    _selectedFloorId = null; // Reset dependent dropdown
+                    _selectedOfficeId = null; // Reset dependent dropdown
+                  });
+                }),
+                _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
+                  setState(() {
+                    _selectedFloorId = value;
+                    _selectedOfficeId = null; // Reset dependent dropdown
+                  });
+                }),
+                _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
+                  setState(() {
+                    _selectedOfficeId = value;
+                  });
+                }),
+                const SizedBox(height: 17),
+                _buildButton(context, 'Ajouter', _ajouterProduit),
+              ],
+            ),
           ),
         ),
       ),

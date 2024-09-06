@@ -80,7 +80,7 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
           : Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/logo.png'), // Replace 'assets/logo.png' with your logo image path
+            image: AssetImage('assets/logo.png'),
             fit: BoxFit.cover, // Cover the whole area
           ),
         ),
@@ -104,8 +104,8 @@ class MenuPage extends StatelessWidget {
       body: GridView.count(
         crossAxisCount: 2,
         padding: const EdgeInsets.all(15),
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 17,
+        crossAxisSpacing: 18,
+        mainAxisSpacing: 40,
         children: [
 
           _buildMenuItem(context, 'Parametre', Icons.settings, () {
@@ -135,7 +135,7 @@ class MenuPage extends StatelessWidget {
           _buildMenuItem(context, 'CSB', Icons.launch, () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Csb()),
+              MaterialPageRoute(builder: (context) => ChatBot()),
             );
           }),
           _buildMenuItem(context, 'Exporter', Icons.file_download, () {

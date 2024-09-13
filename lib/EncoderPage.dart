@@ -22,8 +22,10 @@ class EncoderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Encoder Page'),
+        backgroundColor: Colors.black,
+        title: Text('Encoder Page', style: TextStyle(color: Colors.white),),
       ),
       body: Center(
         child: Column(
@@ -65,8 +67,10 @@ class ProductWithCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Produits avec code barre'),
+        backgroundColor: Colors.black,
+        title: Text('Produits avec code barre', style: TextStyle(color: Colors.white),),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchProducts(),
@@ -76,7 +80,7 @@ class ProductWithCodePage extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Erreur: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Aucun produit avec code barre trouvé.'));
+            return Center(child: Text('Aucun produit avec code barre trouvé.', style: TextStyle(color: Colors.white),));
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.length,
@@ -192,8 +196,10 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Produits sans code barre'),
+        backgroundColor: Colors.black,
+        title: Text('Produits sans code barre', style: TextStyle(color: Colors.white),),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchProducts(),
@@ -203,7 +209,7 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Erreur: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Aucun produit sans code barre trouvé.'));
+            return Center(child: Text('Aucun produit sans code barre trouvé.', style: TextStyle(color: Colors.white),));
           } else {
             return Column(
               children: [

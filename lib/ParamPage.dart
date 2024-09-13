@@ -91,8 +91,10 @@ class _ParamPageState extends State<ParamPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Bâtiments'),
+        backgroundColor: Colors.black,
+        title: Text('Bâtiments', style: TextStyle(color: Colors.white),),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -314,8 +316,10 @@ class _ZonePageState extends State<ZonePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Zones de ${widget.buildingName}'),
+        backgroundColor: Colors.black,
+        title: Text('Zones de ${widget.buildingName}', style: TextStyle(color: Colors.white),),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -499,9 +503,10 @@ class _FloorPageState extends State<FloorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Étages de la zone ${widget.zoneName}'),
+        backgroundColor: Colors.black,
+        title: Text('Étages de la zone ${widget.zoneName}', style: TextStyle(color: Colors.white),),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -682,8 +687,10 @@ class _OfficePageState extends State<OfficePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Bureaux de ${widget.floorName}'),
+        backgroundColor: Colors.black,
+        title: Text('Bureaux de ${widget.floorName}', style: TextStyle(color: Colors.white),),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

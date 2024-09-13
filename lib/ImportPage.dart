@@ -65,8 +65,11 @@ class _ImporterPageState extends State<ImporterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Importer Produits'),
+        backgroundColor: Colors.black,
+        title: Text('Importer Produits', style: TextStyle(color: Colors.white),
+        ),
       ),
       body: Center(
         child: ElevatedButton(

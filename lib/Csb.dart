@@ -20,7 +20,7 @@ class _ChatBotState extends State<ChatBot> {
       _response = '';
     });
 
-    final url = Uri.parse('http://192.168.61.1:8080/ask_psdf');
+    final url = Uri.parse('http://192.168.61.1:8080/ask_pdf');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

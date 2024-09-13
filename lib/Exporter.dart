@@ -18,8 +18,10 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Products List'),
+        backgroundColor: Colors.black,
+        title: Text('Products List', style: TextStyle(color: Colors.white),),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _productsFuture,
@@ -29,7 +31,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No products found.'));
+            return Center(child: Text('No products found.', style: TextStyle(color: Colors.white),));
           } else {
             final products = snapshot.data!;
             return ListView.builder(
@@ -86,8 +88,10 @@ class Exporter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Exporter'),
+        backgroundColor: Colors.black,
+        title: Text('Exporter', style: TextStyle(color: Colors.white),),
       ),
       body: Center(
         child: ElevatedButton(

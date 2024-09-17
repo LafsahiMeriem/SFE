@@ -348,6 +348,7 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
 
 
 
+
 class Ajouter extends StatefulWidget {
   const Ajouter({Key? key}) : super(key: key);
 
@@ -365,17 +366,19 @@ class _AjouterState extends State<Ajouter> {
 
   Widget _buildTextField(String labelText, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
+          labelStyle: TextStyle(color: Colors.blueGrey[800]),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(16.0),
           ),
           filled: true,
-          fillColor: Colors.grey[200],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+          fillColor: Colors.blueGrey[50],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          prefixIcon: Icon(Icons.text_fields, color: Colors.blueGrey[600]),
         ),
       ),
     );
@@ -383,7 +386,7 @@ class _AjouterState extends State<Ajouter> {
 
   Widget _buildDropdownField(String labelText, Future<List<Map<String, dynamic>>> items, String? selectedValue, void Function(String?) onChanged) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: FutureBuilder<List<Map<String, dynamic>>>(
         future: items,
         builder: (context, snapshot) {
@@ -405,11 +408,12 @@ class _AjouterState extends State<Ajouter> {
               }).toList(),
               decoration: InputDecoration(
                 labelText: labelText,
+                labelStyle: TextStyle(color: Colors.blueGrey[800]),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.blueGrey[50],
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
               ),
             );
@@ -420,15 +424,19 @@ class _AjouterState extends State<Ajouter> {
   }
 
   Widget _buildButton(BuildContext context, String label, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        child: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          child: Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.amber,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
           ),
         ),
       ),
@@ -449,18 +457,19 @@ class _AjouterState extends State<Ajouter> {
       bool exists = await DatabaseHelper.instance.barcodeExists(barcode);
       if (exists) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Le code barre existe déjà pour un produit, veuillez entrer un autre code barre.'),
+            backgroundColor: Colors.red[600],
           ),
         );
       } else {
-        // Insérer les données du produit dans la base de données
         await DatabaseHelper.instance.insertProduct(
             product, barcode, selectedBuildingId, selectedZoneId, selectedFloorId, selectedOfficeId);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Produit ajouté avec succès.'),
+            backgroundColor: Colors.green[600],
           ),
         );
 
@@ -475,18 +484,19 @@ class _AjouterState extends State<Ajouter> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Certaines informations manquent. Le produit sera quand même ajouté.'),
+          backgroundColor: Colors.yellow[600],
         ),
       );
 
-      // Insérer les données du produit dans la base de données même si certains champs sont vides
       await DatabaseHelper.instance.insertProduct(
           product, barcode, selectedBuildingId ?? '', selectedZoneId ?? '', selectedFloorId ?? '', selectedOfficeId ?? '');
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Produit ajouté avec succès.'),
+          backgroundColor: Colors.green[600],
         ),
       );
 
@@ -504,55 +514,52 @@ class _AjouterState extends State<Ajouter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: const Text('Ajouter', style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.black,
+        title: const Text('Ajouter', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.grey[850],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Image.asset('assets/building_image.png'),
-                _buildTextField('Produit', _productController),
-                _buildTextField('Code barre', _barcodeController),
-                _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
-                  setState(() {
-                    _selectedBuildingId = value;
-                    _selectedZoneId = null; // Reset dependent dropdown
-                    _selectedFloorId = null; // Reset dependent dropdown
-                    _selectedOfficeId = null; // Reset dependent dropdown
-                  });
-                }),
-                _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
-                  setState(() {
-                    _selectedZoneId = value;
-                    _selectedFloorId = null; // Reset dependent dropdown
-                    _selectedOfficeId = null; // Reset dependent dropdown
-                  });
-                }),
-                _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
-                  setState(() {
-                    _selectedFloorId = value;
-                    _selectedOfficeId = null; // Reset dependent dropdown
-                  });
-                }),
-                _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
-                  setState(() {
-                    _selectedOfficeId = value;
-                  });
-                }),
-                const SizedBox(height: 17),
-                _buildButton(context, 'Ajouter', _ajouterProduit),
-              ],
-            ),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Center(child: Image.asset('assets/building_image.png')),
+            SizedBox(height: 16.0),
+            Text('Ajouter un produit', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+            SizedBox(height: 16.0),
+            _buildTextField('Produit', _productController),
+            _buildTextField('Code barre', _barcodeController),
+            _buildDropdownField('Bâtiment', DatabaseHelper.instance.getAllBuildings(), _selectedBuildingId, (value) {
+              setState(() {
+                _selectedBuildingId = value;
+                _selectedZoneId = null; // Reset dependent dropdown
+                _selectedFloorId = null; // Reset dependent dropdown
+                _selectedOfficeId = null; // Reset dependent dropdown
+              });
+            }),
+            _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
+              setState(() {
+                _selectedZoneId = value;
+                _selectedFloorId = null; // Reset dependent dropdown
+                _selectedOfficeId = null; // Reset dependent dropdown
+              });
+            }),
+            _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
+              setState(() {
+                _selectedFloorId = value;
+                _selectedOfficeId = null; // Reset dependent dropdown
+              });
+            }),
+            _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
+              setState(() {
+                _selectedOfficeId = value;
+              });
+            }),
+            SizedBox(height: 24.0),
+            _buildButton(context, 'Ajouter', _ajouterProduit),
+          ],
         ),
       ),
     );
   }
 }
-

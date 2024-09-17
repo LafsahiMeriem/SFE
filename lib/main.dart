@@ -46,6 +46,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
 class LogoMenuPage extends StatefulWidget {
   const LogoMenuPage({Key? key});
 
@@ -53,18 +54,45 @@ class LogoMenuPage extends StatefulWidget {
   _LogoMenuPageState createState() => _LogoMenuPageState();
 }
 
-class _LogoMenuPageState extends State<LogoMenuPage> {
+class _LogoMenuPageState extends State<LogoMenuPage> with SingleTickerProviderStateMixin {
   bool _showMenu = false;
+  late AnimationController _controller;
+  late Animation<double> _textAnimation;
+  late Animation<double> _logoAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Initialize animation controller
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    // Define animations
+    _textAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    _logoAnimation = Tween<double>(begin: 0.0, end: 10.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     // Show the menu after a delay of 20 seconds
-    Future.delayed(const Duration(seconds: 20), () {
+    Future.delayed(const Duration(seconds: 10), () {
       setState(() {
         _showMenu = true;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -83,42 +111,51 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/logo.png'),
-            fit: BoxFit.contain, // Adjust fit as needed
+            fit: BoxFit.contain,
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Bienvenue dans notre application',
-                style: TextStyle(
-                  fontFamily: 'Roboto', // Change to your preferred font
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
-                  foreground: Paint()
-                    ..shader = LinearGradient(
-                      colors: <Color>[Colors.amber, Colors.brown],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
-                  shadows: <Shadow>[
-                    Shadow(
-                      offset: Offset(3.0, 3.0),
-                      blurRadius: 5.0,
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                  ],
+            FadeTransition(
+              opacity: _textAnimation,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Bienvenue dans notre application',
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
+                    foreground: Paint()
+                      ..shader = LinearGradient(
+                        colors: <Color>[Colors.amber, Colors.brown],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
+                    shadows: <Shadow>[
+                      Shadow(
+                        offset: Offset(3.0, 3.0),
+                        blurRadius: 5.0,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
-            Expanded(
-              child: Align(
-                alignment: Alignment.center,
-                child: Image.asset('assets/logo.png'),
+            SizedBox(
+              height: 20,
+            ),
+            SlideTransition(
+              position: _logoAnimation.drive(
+                Tween<Offset>(
+                  begin: Offset.zero,
+                  end: const Offset(0, 0.1),
+                ),
               ),
+              child: Image.asset('assets/logo.png'),
             ),
           ],
         ),
@@ -127,17 +164,68 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
   }
 }
 
-class MenuPage extends StatelessWidget {
-  const MenuPage({Key? key});
+
+
+class MenuPage extends StatefulWidget {
+  const MenuPage({Key? key}) : super(key: key);
+
+  @override
+  _MenuPageState createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<Color?> _colorAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _colorAnimation = ColorTween(begin: Colors.white, end: Colors.amber).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Menu Page', style: TextStyle(color: Colors.white),),
+        title: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Text(
+                'Menu Page',
+                style: TextStyle(
+                  color: _colorAnimation.value,
+                  fontFamily: 'Roboto', // Change to your preferred font
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            );
+          },
+        ),
         backgroundColor: Colors.black,
-
+        elevation: 0, // Remove shadow under the AppBar
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -145,7 +233,6 @@ class MenuPage extends StatelessWidget {
         crossAxisSpacing: 18,
         mainAxisSpacing: 40,
         children: [
-
           _buildMenuItem(context, 'Emplacement', Icons.location_on, () {
             Navigator.push(
               context,
@@ -182,21 +269,33 @@ class MenuPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => Exporter()),
             );
           }),
-
         ],
       ),
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, String title, IconData iconData,
-      Function()? onTap) {
+  Widget _buildMenuItem(BuildContext context, String title, IconData iconData, Function()? onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
-            color: Colors.brown,
+          gradient: LinearGradient(
+            colors: [Colors.amber, Colors.brown],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
+        transform: Matrix4.identity()..scale(1.05),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -210,7 +309,19 @@ class MenuPage extends StatelessWidget {
             ),
             Text(
               title,
-              style: Theme.of(context).textTheme.headline6,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(1.0, 1.0),
+                    blurRadius: 2.0,
+                    color: Color(0x80000000), // Semi-transparent black
+                  ),
+                ],
+              ),
             ),
           ],
         ),

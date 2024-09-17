@@ -207,7 +207,7 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Padding(
-          padding: const EdgeInsets.only(top: 28), // Adjust this value to lower or raise the title
+          padding: const EdgeInsets.only(top: 25), // Adjust this value to lower or raise the title
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
@@ -371,15 +371,17 @@ class _AjouterState extends State<Ajouter> {
         controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: TextStyle(color: Colors.blueGrey[800]),
+          labelStyle: TextStyle(color: Colors.white70),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16.0),
+            borderSide: BorderSide(color: Colors.white24),
           ),
           filled: true,
-          fillColor: Colors.blueGrey[50],
+          fillColor: Colors.black,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-          prefixIcon: Icon(Icons.text_fields, color: Colors.blueGrey[600]),
+          prefixIcon: Icon(Icons.text_fields, color: Colors.white70),
         ),
+        style: TextStyle(color: Colors.white),
       ),
     );
   }
@@ -403,19 +405,22 @@ class _AjouterState extends State<Ajouter> {
               items: names.map((String name) {
                 return DropdownMenuItem<String>(
                   value: name,
-                  child: Text(name),
+                  child: Text(name, style: TextStyle(color: Colors.white)),
                 );
               }).toList(),
               decoration: InputDecoration(
                 labelText: labelText,
-                labelStyle: TextStyle(color: Colors.blueGrey[800]),
+                labelStyle: TextStyle(color: Colors.white70),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide(color: Colors.white24),
                 ),
                 filled: true,
-                fillColor: Colors.blueGrey[50],
+                fillColor: Colors.black,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
               ),
+              dropdownColor: Colors.black,
+              style: TextStyle(color: Colors.white),
             );
           }
         },
@@ -516,8 +521,26 @@ class _AjouterState extends State<Ajouter> {
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: const Text('Ajouter', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.grey[850],
+        backgroundColor: Colors.grey[900],
+        centerTitle: true,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 25),  // Ajustez ce padding pour déplacer le titre
+          child: Text(
+            'Ajouter',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.amber,
+              shadows: [
+                Shadow(
+                  offset: Offset(2.0, 2.0),
+                  blurRadius: 3.0,
+                  color: Colors.black.withOpacity(0.5),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

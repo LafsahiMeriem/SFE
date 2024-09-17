@@ -206,70 +206,84 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Text(
-                'Menu Page',
-                style: TextStyle(
-                  color: _colorAnimation.value,
-                  fontFamily: 'Roboto', // Change to your preferred font
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 28), // Adjust this value to lower or raise the title
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Text(
+                  'Menu Page',
+                  style: TextStyle(
+                    color: _colorAnimation.value,
+                    fontFamily: 'Roboto', // Change to your preferred font
+                    fontSize: 29, // Increased font size
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(2.0, 2.0),
+                        blurRadius: 6.0, // Increased blur radius
+                        color: Color(0x80000000), // Semi-transparent black
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
         backgroundColor: Colors.black,
         elevation: 0, // Remove shadow under the AppBar
+        centerTitle: true, // Center the title
       ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        padding: const EdgeInsets.all(15),
-        crossAxisSpacing: 18,
-        mainAxisSpacing: 40,
-        children: [
-          _buildMenuItem(context, 'Emplacement', Icons.location_on, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ParamPage()),
-            );
-          }),
-          _buildMenuItem(context, 'Ajouter', Icons.add_box, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Ajouter()),
-            );
-          }),
-          _buildMenuItem(context, 'Importer', Icons.archive, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ImporterPage()),
-            );
-          }),
-          _buildMenuItem(context, 'Encoder', Icons.qr_code, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => EncoderPage()),
-            );
-          }),
-          _buildMenuItem(context, 'InvChat', Icons.question_answer, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ChatBot()),
-            );
-          }),
-          _buildMenuItem(context, 'Explorer', Icons.storage, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Exporter()),
-            );
-          }),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.only(top: 30.0), // Add padding to move buttons down
+        child: GridView.count(
+          crossAxisCount: 2,
+          padding: const EdgeInsets.all(15),
+          crossAxisSpacing: 18,
+          mainAxisSpacing: 40,
+          children: [
+            _buildMenuItem(context, 'Emplacement', Icons.location_on, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ParamPage()),
+              );
+            }),
+            _buildMenuItem(context, 'Ajouter', Icons.add_box, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Ajouter()),
+              );
+            }),
+            _buildMenuItem(context, 'Importer', Icons.archive, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ImporterPage()),
+              );
+            }),
+            _buildMenuItem(context, 'Encoder', Icons.qr_code, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EncoderPage()),
+              );
+            }),
+            _buildMenuItem(context, 'InvChat', Icons.question_answer, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatBot()),
+              );
+            }),
+            _buildMenuItem(context, 'Explorer', Icons.storage, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Exporter()),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

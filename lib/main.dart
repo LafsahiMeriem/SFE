@@ -22,11 +22,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
-        hintColor: Colors.deepOrangeAccent,
+        hintColor: Colors.red,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white,
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.red,
           ),
         ),
         textTheme: const TextTheme(
@@ -59,8 +59,8 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
   @override
   void initState() {
     super.initState();
-    // Show the menu after a delay of 3 seconds
-    Future.delayed(const Duration(seconds: 8), () {
+    // Show the menu after a delay of 20 seconds
+    Future.delayed(const Duration(seconds: 20), () {
       setState(() {
         _showMenu = true;
       });
@@ -70,10 +70,12 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: _showMenu
           ? null
           : AppBar(
-        title: const Text('Scanner Application'),
+        title: const Text(''),
+        backgroundColor: Colors.black,
       ),
       body: _showMenu
           ? const MenuPage()
@@ -81,8 +83,44 @@ class _LogoMenuPageState extends State<LogoMenuPage> {
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/logo.png'),
-            fit: BoxFit.cover, // Cover the whole area
+            fit: BoxFit.contain, // Adjust fit as needed
           ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Bienvenue dans notre application',
+                style: TextStyle(
+                  fontFamily: 'Roboto', // Change to your preferred font
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                  foreground: Paint()
+                    ..shader = LinearGradient(
+                      colors: <Color>[Colors.amber, Colors.brown],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
+                  shadows: <Shadow>[
+                    Shadow(
+                      offset: Offset(3.0, 3.0),
+                      blurRadius: 5.0,
+                      color: Colors.black.withOpacity(0.5),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: Image.asset('assets/logo.png'),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -108,19 +146,19 @@ class MenuPage extends StatelessWidget {
         mainAxisSpacing: 40,
         children: [
 
-          _buildMenuItem(context, 'Parametre', Icons.settings, () {
+          _buildMenuItem(context, 'Emplacement', Icons.location_on, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => ParamPage()),
             );
           }),
-          _buildMenuItem(context, 'Ajouter', Icons.add, () {
+          _buildMenuItem(context, 'Ajouter', Icons.add_box, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const Ajouter()),
             );
           }),
-          _buildMenuItem(context, 'Importer', Icons.file_upload, () {
+          _buildMenuItem(context, 'Importer', Icons.archive, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => ImporterPage()),
@@ -132,13 +170,13 @@ class MenuPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => EncoderPage()),
             );
           }),
-          _buildMenuItem(context, 'CSB', Icons.launch, () {
+          _buildMenuItem(context, 'InvChat', Icons.question_answer, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => ChatBot()),
             );
           }),
-          _buildMenuItem(context, 'Exporter', Icons.file_download, () {
+          _buildMenuItem(context, 'Explorer', Icons.storage, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => Exporter()),
@@ -156,7 +194,7 @@ class MenuPage extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
+            color: Colors.brown,
           borderRadius: BorderRadius.circular(25),
         ),
         child: Column(
@@ -263,7 +301,7 @@ class _AjouterState extends State<Ajouter> {
         onPressed: onPressed,
         child: Text(label),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: Colors.red,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),

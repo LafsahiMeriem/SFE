@@ -91,7 +91,7 @@ class Exporter extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text('Exporter', style: TextStyle(color: Colors.white),),
+        title: Text('Explorer', style: TextStyle(color: Colors.white),),
       ),
       body: Center(
         child: ElevatedButton(
@@ -101,7 +101,7 @@ class Exporter extends StatelessWidget {
               MaterialPageRoute(builder: (context) => ProductsListScreen()),
             );
           },
-          child: Text('Exporter'),
+          child: Text('Parcourir'),
         ),
       ),
     );

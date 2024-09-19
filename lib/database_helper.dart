@@ -233,12 +233,14 @@ CREATE TABLE $ProductsTable (
 
   // Zone CRUD operations
 
-  Future<void> insertZone(int buildingId, String name) async {
+  Future<int> insertZone(int buildingId, String name) async {
     final db = await instance.database;
 
-    await db.insert(zonesTable, {'building_id': buildingId, 'name': name});
-    print('Zone inserted successfully: $name');
+    // Insertion de la zone
+    int zoneId = await db.insert(zonesTable, {'building_id': buildingId, 'name': name});
 
+    print('Zone inserted successfully: $name with ID: $zoneId');
+    return zoneId;
   }
 
 
@@ -327,7 +329,26 @@ CREATE TABLE $ProductsTable (
 
   Future<List<Map<String, dynamic>>> getFloorsForZone(int zoneId) async {
     final db = await instance.database;
-    return await db.query(floorsTable, where: 'zone_id = ?', whereArgs: [zoneId]);
+
+    try {
+      // Exécuter la requête de sélection
+      List<Map<String, dynamic>> result = await db.query(
+        floorsTable,
+        where: 'zone_id = ?',
+        whereArgs: [zoneId],
+      );
+
+      // Vérifier si des résultats ont été retournés
+      if (result.isEmpty) {
+        print("Aucun étage trouvé pour la zone $zoneId");
+      }
+
+      return result;
+    } catch (e) {
+      // Gestion des erreurs
+      print("Erreur lors de la récupération des étages pour la zone $zoneId : $e");
+      return [];
+    }
   }
 
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'package:excel/excel.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
-import 'database_helper.dart'; // Assurez-vous que ce chemin est correct
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart'; // Pour importer des polices Google
+import 'package:animate_do/animate_do.dart'; // Pour les animations
+import 'database_helper.dart';
 
 class ImporterPage extends StatefulWidget {
   @override
@@ -13,22 +15,21 @@ class ImporterPage extends StatefulWidget {
 
 class _ImporterPageState extends State<ImporterPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+  bool _isLoading = false;
 
   Future<void> exportToFile(BuildContext context) async {
     if (await Permission.storage.request().isGranted) {
+      setState(() {
+        _isLoading = true;
+      });
+
       try {
         List<Map<String, dynamic>> produits = await _databaseHelper.getProduits();
-
-        // Debugging: Print the retrieved products
-        print("Retrieved products: $produits");
-
         var excel = Excel.createExcel();
         Sheet sheetObject = excel['Produits'];
 
-        // Ajouter les en-têtes de colonnes (facultatif, mais recommandé)
         sheetObject.appendRow(['Nom du produit', 'Code barre', 'Etage', 'Zone', 'Batiment', 'Bureau']);
 
-        // Ajouter les produits
         for (var produit in produits) {
           sheetObject.appendRow([
             produit['name'] ?? '',
@@ -40,7 +41,6 @@ class _ImporterPageState extends State<ImporterPage> {
           ]);
         }
 
-        // Enregistrer le fichier Excel
         final directory = await getExternalStorageDirectory();
         String filePath = '${directory!.path}/produits.xlsx';
         File(filePath)
@@ -48,16 +48,38 @@ class _ImporterPageState extends State<ImporterPage> {
           ..writeAsBytesSync(excel.encode()!);
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Produits exportés avec succès vers $filePath'),
+          content: Row(
+            children: [
+              Icon(Icons.check, color: Colors.green),
+              SizedBox(width: 10),
+              Text('Produits exportés avec succès vers $filePath'),
+            ],
+          ),
         ));
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Erreur lors de l\'exportation des produits: $e'),
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red),
+              SizedBox(width: 10),
+              Text('Erreur lors de l\'exportation des produits: $e'),
+            ],
+          ),
         ));
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Permission de stockage refusée'),
+        content: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange),
+            SizedBox(width: 10),
+            Text('Permission de stockage refusée'),
+          ],
+        ),
       ));
     }
   }
@@ -65,17 +87,90 @@ class _ImporterPageState extends State<ImporterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.brown[900],
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Importer Produits', style: TextStyle(color: Colors.white),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.brown, Colors.amber],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
         ),
+        title: FadeIn( // Animation du titre
+          duration: Duration(seconds: 2),
+          child: Text(
+            'Importer Produits',
+            style: GoogleFonts.poppins( // Utilisation d'une police plus moderne
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 26,
+                shadows: [
+                  Shadow(
+                    offset: Offset(2.0, 2.0),
+                    blurRadius: 4.0,
+                    color: Colors.black.withOpacity(0.4),
+                  ),
+                ],
+                letterSpacing: 1.8,
+              ),
+            ),
+          ),
+        ),
+        centerTitle: true,
+        elevation: 10,
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () => exportToFile(context),
-          child: Text('Importer le fichier Excel'),
-        ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.brown, Colors.amber[200]!],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          Center(
+            child: _isLoading
+                ? SpinKitFadingCircle(
+              color: Colors.amber,
+              size: 50.0,
+            )
+                : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.file_upload,
+                  color: Colors.amber[300],
+                  size: 100,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                    backgroundColor: Colors.amber,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 10,
+                  ),
+                  onPressed: () => exportToFile(context),
+                  child: Text(
+                    'Importer le fichier Excel',
+                    style: TextStyle(
+                      color: Colors.brown[900],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

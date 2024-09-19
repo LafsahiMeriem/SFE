@@ -1,4 +1,6 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'database_helper.dart';
 
 void main() {
@@ -22,40 +24,107 @@ class EncoderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Encoder Page', style: TextStyle(color: Colors.white),),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(80), // Hauteur de l'AppBar personnalisée
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.brown, Colors.amber],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent, // Rendre le fond transparent
+            title: Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: FadeIn( // Animation du titre
+                duration: Duration(seconds: 2),
+                child: Text(
+                  'Sélection de Produits',
+                  style: GoogleFonts.poppins( // Utilisation de la police Poppins
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.0, 2.0),
+                          blurRadius: 4.0,
+                          color: Colors.black.withOpacity(0.4),
+                        ),
+                      ],
+                      letterSpacing: 1.8,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
+            elevation: 0, // Supprimer l'ombre
+          ),
+        ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProductWithCodePage()),
-                );
-              },
-              child: Text('Produits avec code barre'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProductWithoutCodePage()),
-                );
-              },
-              child: Text('Produits sans code barre'),
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.brown, Colors.amber],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 10,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProductWithCodePage()),
+                  );
+                },
+                child: Text('Produits avec code barre', style: TextStyle(color: Colors.brown[900], fontSize: 18)),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 10,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProductWithoutCodePage()),
+                  );
+                },
+                child: Text('Produits sans code barre', style: TextStyle(color: Colors.brown[900], fontSize: 18)),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
+
 
 class ProductWithCodePage extends StatelessWidget {
   final DatabaseHelper dbHelper = DatabaseHelper.instance;
@@ -67,10 +136,21 @@ class ProductWithCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Produits avec code barre', style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.brown[900],
+        title: Padding( // Ajout de padding ici
+          padding: const EdgeInsets.only(top: 20), // Ajustez la valeur selon vos besoins
+          child: Text(
+            'Produits avec code barre',
+            style: TextStyle(
+              color: Colors.white, // Changer la couleur du texte en blanc
+            ),
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchProducts(),
@@ -80,7 +160,7 @@ class ProductWithCodePage extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Erreur: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Aucun produit avec code barre trouvé.', style: TextStyle(color: Colors.white),));
+            return Center(child: Text('Aucun produit avec code barre trouvé.'));
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.length,
@@ -93,10 +173,7 @@ class ProductWithCodePage extends StatelessWidget {
                     color: Colors.red,
                     alignment: Alignment.centerRight,
                     padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
+                    child: Icon(Icons.delete, color: Colors.white),
                   ),
                   confirmDismiss: (direction) async {
                     return await showDialog(
@@ -124,8 +201,10 @@ class ProductWithCodePage extends StatelessWidget {
                   },
                   child: Card(
                     color: Color(0xFFFF6E40),
+                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    elevation: 8,
                     child: ListTile(
-                      title: Text(product['name']),
+                      title: Text(product['name'], style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text('Code barre: ${product['barcode']}'),
                     ),
                   ),
@@ -138,10 +217,12 @@ class ProductWithCodePage extends StatelessWidget {
     );
   }
 }
+
 class ProductWithoutCodePage extends StatefulWidget {
   @override
   _ProductWithoutCodePageState createState() => _ProductWithoutCodePageState();
 }
+
 
 class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
   final DatabaseHelper dbHelper = DatabaseHelper.instance;
@@ -196,10 +277,21 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Produits sans code barre', style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.brown[900],
+        title: Padding( // Ajout de padding ici
+          padding: const EdgeInsets.only(top: 20),
+          child: Text(
+            'Produits sans code barre',
+            style: TextStyle(
+              color: Colors.white, // Changer la couleur du texte en blanc
+            ),
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchProducts(),
@@ -209,7 +301,7 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Erreur: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Aucun produit sans code barre trouvé.', style: TextStyle(color: Colors.white),));
+            return Center(child: Text('Aucun produit sans code barre trouvé.'));
           } else {
             return Column(
               children: [
@@ -219,24 +311,35 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
                     itemBuilder: (context, index) {
                       var product = snapshot.data![index];
                       String productName = product['name'];
-                      return ListTile(
-                        title: Text(productName),
-                        trailing: ElevatedButton(
-                          onPressed: () {
-                            _showBarcodeInputDialog(context, productName);
-                          },
-                          child: Text('Ajouter code-barres'),
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        color: Color(0xFFFF6E40),
+                        elevation: 8,
+                        child: ListTile(
+                          title: Text(productName, style: TextStyle(fontWeight: FontWeight.bold)),
+                          trailing: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            onPressed: () {
+                              _showBarcodeInputDialog(context, productName);
+                            },
+                            child: Text('Ajouter code-barres'),
+                          ),
                         ),
                       );
                     },
                   ),
                 ),
                 FloatingActionButton(
+                  backgroundColor: Colors.amber,
                   onPressed: () {
-                    // Recharger la liste des produits
                     setState(() {}); // Actualiser la page
                   },
-                  child: Icon(Icons.refresh),
+                  child: Icon(Icons.refresh, color: Colors.brown[900]),
                 ),
               ],
             );
@@ -246,3 +349,4 @@ class _ProductWithoutCodePageState extends State<ProductWithoutCodePage> {
     );
   }
 }
+

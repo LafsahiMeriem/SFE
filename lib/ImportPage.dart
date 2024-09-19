@@ -98,23 +98,26 @@ class _ImporterPageState extends State<ImporterPage> {
             ),
           ),
         ),
-        title: FadeIn( // Animation du titre
-          duration: Duration(seconds: 2),
-          child: Text(
-            'Importer Produits',
-            style: GoogleFonts.poppins( // Utilisation d'une police plus moderne
-              textStyle: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 26,
-                shadows: [
-                  Shadow(
-                    offset: Offset(2.0, 2.0),
-                    blurRadius: 4.0,
-                    color: Colors.black.withOpacity(0.4),
-                  ),
-                ],
-                letterSpacing: 1.8,
+        title: Padding( // Ajout de padding ici
+          padding: const EdgeInsets.only(top: 20),
+          child: FadeIn( // Animation du titre
+            duration: Duration(seconds: 2),
+            child: Text(
+              'Importer Produits',
+              style: GoogleFonts.poppins( // Utilisation d'une police plus moderne
+                textStyle: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2.0, 2.0),
+                      blurRadius: 4.0,
+                      color: Colors.black.withOpacity(0.4),
+                    ),
+                  ],
+                  letterSpacing: 1.8,
+                ),
               ),
             ),
           ),

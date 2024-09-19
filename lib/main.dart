@@ -207,7 +207,7 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Padding(
-          padding: const EdgeInsets.only(top: 25), // Adjust this value to lower or raise the title
+          padding: const EdgeInsets.only(top: 20), // Adjust this value to lower or raise the title
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
@@ -218,7 +218,7 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
                   style: TextStyle(
                     color: _colorAnimation.value,
                     fontFamily: 'Roboto', // Change to your preferred font
-                    fontSize: 29, // Increased font size
+                    fontSize: 28, // Increased font size
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
                     shadows: [

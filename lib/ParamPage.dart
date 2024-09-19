@@ -162,7 +162,7 @@ class _ParamPageState extends State<ParamPage> {
               },
               child: Text('Supprimer toute la base de données'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Couleur rouge pour indiquer un danger
+                backgroundColor: Colors.amber, // Couleur rouge pour indiquer un danger
               ),
             ),
           ],

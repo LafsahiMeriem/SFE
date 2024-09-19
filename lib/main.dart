@@ -21,12 +21,12 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        primarySwatch: Colors.amber,
         hintColor: Colors.red,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white,
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.amber,
           ),
         ),
         textTheme: const TextTheme(
@@ -570,10 +570,10 @@ class _AjouterState extends State<Ajouter> {
             _buildDropdownField('Étage', DatabaseHelper.instance.getFloorsForZone(int.tryParse(_selectedZoneId ?? '') ?? 0), _selectedFloorId, (value) {
               setState(() {
                 _selectedFloorId = value;
-                _selectedOfficeId = null; // Reset dependent dropdown
+                _selectedOfficeId = null;
               });
             }),
-            _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
+            _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
               setState(() {
                 _selectedOfficeId = value;
               });

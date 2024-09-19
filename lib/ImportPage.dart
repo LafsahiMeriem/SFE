@@ -4,8 +4,8 @@ import 'package:excel/excel.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:google_fonts/google_fonts.dart'; // Pour importer des polices Google
-import 'package:animate_do/animate_do.dart'; // Pour les animations
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
 import 'database_helper.dart';
 
 class ImporterPage extends StatefulWidget {
@@ -41,8 +41,16 @@ class _ImporterPageState extends State<ImporterPage> {
           ]);
         }
 
+        // Utilisation du répertoire de téléchargement
         final directory = await getExternalStorageDirectory();
-        String filePath = '${directory!.path}/produits.xlsx';
+        String filePath = '${directory!.path}/Download/produits.xlsx'; // Chemin d'accès
+
+        // Créer le répertoire Download s'il n'existe pas
+        final downloadDir = Directory('${directory.path}/Download');
+        if (!await downloadDir.exists()) {
+          await downloadDir.create(recursive: true);
+        }
+
         File(filePath)
           ..createSync(recursive: true)
           ..writeAsBytesSync(excel.encode()!);
@@ -98,13 +106,13 @@ class _ImporterPageState extends State<ImporterPage> {
             ),
           ),
         ),
-        title: Padding( // Ajout de padding ici
+        title: Padding(
           padding: const EdgeInsets.only(top: 20),
-          child: FadeIn( // Animation du titre
+          child: FadeIn(
             duration: Duration(seconds: 2),
             child: Text(
               'Importer Produits',
-              style: GoogleFonts.poppins( // Utilisation d'une police plus moderne
+              style: GoogleFonts.poppins(
                 textStyle: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

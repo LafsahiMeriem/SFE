@@ -24,7 +24,7 @@ class _ImporterPageState extends State<ImporterPage> {
       });
 
       try {
-        List<Map<String, dynamic>> produits = await _databaseHelper.getProduits();
+        List<Map<String, dynamic>> produits = await _databaseHelper.getProducts();
         var excel = Excel.createExcel();
         Sheet sheetObject = excel['Produits'];
 

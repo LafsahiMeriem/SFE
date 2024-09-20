@@ -117,11 +117,11 @@ CREATE TABLE $ProductsTable (
       'floor_id': floorId,
       'office_id': officeId,
     });
-    print('Produit inséré avec succès : $name');
+    print('Product inserted successfully: $name');
   }
 
 
-  Future<List<Map<String, dynamic>>> getProduits() async {
+  Future<List<Map<String, dynamic>>> getProducts() async {
     final db = await instance.database;
     return await db.query(ProductsTable);
   }
@@ -135,6 +135,7 @@ CREATE TABLE $ProductsTable (
     );
     return result.isNotEmpty;
   }
+
   Future<void> insertProductWithBarcode(String name, String barcode) async {
     final db = await instance.database;
     await db.insert(ProductsTable, {
@@ -184,7 +185,7 @@ CREATE TABLE $ProductsTable (
       where: 'name = ?',
       whereArgs: [productName],
     );
-    print('Produit supprimé avec succès : $productName');
+    print('Product deleted successfully: $productName');
   }
 
 
@@ -202,21 +203,23 @@ CREATE TABLE $ProductsTable (
   Future<String?> insertBuilding(String name) async {
     final db = await instance.database;
 
-    // Vérifier si le bâtiment existe déjà
-    List<Map<String, dynamic>> existingBuildings = await db.query(buildingsTable,
-        where: 'name = ?', whereArgs: [name]);
+    // Check if the building already exists
+    List<Map<String, dynamic>> existingBuildings = await db.query(
+      buildingsTable,
+      where: 'name = ?',
+      whereArgs: [name],
+    );
 
-    // Si le bâtiment n'existe pas déjà, l'insérer
     if (existingBuildings.isEmpty) {
-      await db.insert(buildingsTable, {'name': name});
-      print('Building inserted successfully: $name');
-      return name; // Retourne le nom du bâtiment inséré
+      // Insert the building if it doesn't exist
+      int id = await db.insert(buildingsTable, {'name': name});
+      print('Building inserted successfully with ID: $id');
+      return name;  // Return the building name or ID if needed
     } else {
       print('Building already exists: $name');
-      return null; // Retourne null si le bâtiment existe déjà
+      return null;  // Return null if the building already exists
     }
   }
-
 
   Future<List<Map<String, dynamic>>> getAllBuildings() async {
     final db = await instance.database;
@@ -235,13 +238,11 @@ CREATE TABLE $ProductsTable (
 
   Future<int> insertZone(int buildingId, String name) async {
     final db = await instance.database;
-
-    // Insertion de la zone
     int zoneId = await db.insert(zonesTable, {'building_id': buildingId, 'name': name});
-
     print('Zone inserted successfully: $name with ID: $zoneId');
     return zoneId;
   }
+
 
 
   Future<bool> zoneExistsForBuilding(int buildingId, String zoneName) async {
@@ -261,12 +262,12 @@ CREATE TABLE $ProductsTable (
     return await db.query(zonesTable, where: 'building_id = ?', whereArgs: [buildingId]);
   }
 
+
   Future<void> deleteZone(int buildingId, int zoneId) async {
     final db = await instance.database;
     await db.delete(zonesTable, where: 'building_id = ? AND id = ?', whereArgs: [buildingId, zoneId]);
     print('Zone deleted successfully: $zoneId');
   }
-
 
   // Floor CRUD operations
 
@@ -280,13 +281,10 @@ CREATE TABLE $ProductsTable (
 
   Future<void> deleteFloor(int zoneId, String floorName) async {
     final db = await instance.database;
-    await db.delete(
-      floorsTable,
-      where: 'zone_id = ? AND name = ?',
-      whereArgs: [zoneId, floorName],
-    );
+    await db.delete(floorsTable, where: 'zone_id = ? AND name = ?', whereArgs: [zoneId, floorName]);
     print('Floor deleted successfully: $floorName');
   }
+
 
   Future<int> getFloorId(int zoneId, String floorName) async {
     final db = await instance.database;
@@ -302,7 +300,10 @@ CREATE TABLE $ProductsTable (
       return -1;
     }
   }
-
+  Future<List<Map<String, dynamic>>> getFloorsForZone(int zoneId) async {
+    final db = await instance.database;
+    return await db.query(floorsTable, where: 'zone_id = ?', whereArgs: [zoneId]);
+  }
 
 
 
@@ -314,44 +315,31 @@ CREATE TABLE $ProductsTable (
     final db = await instance.database;
     await db.insert(officesTable, {'floor_id': floorId, 'zone_id': zoneId, 'name': name});
     print('Office inserted successfully: $name');
-
-
   }
+
+
+
+
 
 
   Future<List<Map<String, dynamic>>> getOfficesForFloor(int floorId) async {
     final db = await instance.database;
-    return await db.query(officesTable, where: 'floor_id = ?', whereArgs: [floorId]);
-  }
-
-
-
-
-  Future<List<Map<String, dynamic>>> getFloorsForZone(int zoneId) async {
-    final db = await instance.database;
 
     try {
-      // Exécuter la requête de sélection
-      List<Map<String, dynamic>> result = await db.query(
-        floorsTable,
-        where: 'zone_id = ?',
-        whereArgs: [zoneId],
-      );
+      // Debugging output to see the floorId being used
+      print('Fetching offices for floorId: $floorId');
 
-      // Vérifier si des résultats ont été retournés
-      if (result.isEmpty) {
-        print("Aucun étage trouvé pour la zone $zoneId");
-      }
+      List<Map<String, dynamic>> result = await db.query(officesTable, where: 'floor_id = ?', whereArgs: [floorId]);
+
+      // Log how many offices were found
+      print('Offices found: ${result.length}');
 
       return result;
     } catch (e) {
-      // Gestion des erreurs
-      print("Erreur lors de la récupération des étages pour la zone $zoneId : $e");
+      print('Error fetching offices for floorId $floorId: $e');
       return [];
     }
   }
-
-
   Future<void> deleteOffice(String floorName, String officeName) async {
     final db = await instance.database;
     await db.delete(
@@ -361,8 +349,6 @@ CREATE TABLE $ProductsTable (
     );
     print('Office deleted successfully: $officeName');
   }
-
-
 
   Future<void> deleteAllOfficesForFloor(int zoneId, String floorName) async {
     final db = await instance.database;

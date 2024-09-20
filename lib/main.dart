@@ -560,7 +560,7 @@ class _AjouterState extends State<Ajouter> {
                 _selectedOfficeId = null; // Reset dependent dropdown
               });
             }),
-            _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 0), _selectedZoneId, (value) {
+            _buildDropdownField('Zone', DatabaseHelper.instance.getZonesForBuilding(int.tryParse(_selectedBuildingId ?? '') ?? 1), _selectedZoneId, (value) {
               setState(() {
                 _selectedZoneId = value;
                 _selectedFloorId = null; // Reset dependent dropdown
@@ -573,7 +573,7 @@ class _AjouterState extends State<Ajouter> {
                 _selectedOfficeId = null;
               });
             }),
-            _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 0), _selectedOfficeId, (value) {
+            _buildDropdownField('Bureau', DatabaseHelper.instance.getOfficesForFloor(int.tryParse(_selectedFloorId ?? '') ?? 1), _selectedOfficeId, (value) {
               setState(() {
                 _selectedOfficeId = value;
               });

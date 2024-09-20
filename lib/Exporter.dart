@@ -12,7 +12,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> {
   @override
   void initState() {
     super.initState();
-    _productsFuture = DatabaseHelper.instance.getProduits();
+    _productsFuture = DatabaseHelper.instance.getProducts();
   }
 
   @override
